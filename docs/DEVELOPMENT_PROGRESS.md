@@ -2,7 +2,7 @@
 
 - [x] Inspect the starting checkout and existing integration repositories.
 - [x] Establish 13 reporting routes, centre and period selection, and shared reporting layouts.
-- [x] Build initial Drizzle schema, demo database and production authentication boundary.
+- [x] Build initial Drizzle schema, demo database and shared workspace configuration.
 - [x] Add manual reporting, conclusions, action tracking and a shared developments model.
 - [ ] Phase 3 analytical calculations and redesigned Excel/CSV import.
 - [ ] Phase 4 verified live source adapters, mappings and sync operations.
@@ -14,4 +14,4 @@
 - Six Vitest checks and four legacy import-validation checks pass.
 - TypeScript and the Vite production build pass.
 - Two Chromium journeys pass, covering desktop reporting and presentation, and mobile navigation, theme and the source registry.
-- The Neon Auth SDK path was exercised against a local mock. Hosted Neon and Vercel verification remains pending.
+- Shared workspace access was verified locally. Hosted Neon and Vercel verification remains pending.

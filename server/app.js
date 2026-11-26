@@ -3,8 +3,7 @@ import helmet from 'helmet';
 import { rateLimit } from 'express-rate-limit';
 import { ZodError } from 'zod';
 import { fileURLToPath } from 'node:url';
-import { sql } from 'drizzle-orm';
-import { installAuth } from './auth.js';
+import { loadActor } from './permissions.js';
 import { reportRoutes, RequestError } from './report-routes.js';
 import { adminRoutes } from './admin-routes.js';
 
@@ -19,7 +18,7 @@ export function createApp(db, config) {
   }));
   app.get(['/healthz','/api/healthz'], async (_req,res) => {
     res.set('Cache-Control','no-store');
-    try { await db.execute(sql`select 1 from organisations limit 1`); res.json({ready:true}); }
+    try { const actor = await loadActor(db,config.actorSubject); res.status(actor ? 200 : 503).json({ready:!!actor}); }
     catch { res.status(503).json({ready:false}); }
   });
   app.use('/api', (req,res,next) => {
@@ -33,7 +32,11 @@ export function createApp(db, config) {
     message:{error:'Too many requests. Wait a minute and try again.'}}));
   app.use('/api',express.json({limit:'96kb'}));
   app.get('/api/config', (_req,res) => res.json({demo:config.demo}));
-  installAuth(app,db,config);
+  app.use('/api', async (req,res,next) => {
+    req.actor = await loadActor(db,config.actorSubject);
+    if (!req.actor) return res.status(503).json({error:'The reporting workspace has not been initialised. Run the database setup command.'});
+    next();
+  });
   app.use('/api',adminRoutes(db,config),reportRoutes(db));
   app.use('/api', (_req,res) => res.status(404).json({error:'Endpoint was not found.'}));
   if (config.serveFrontend !== false) {

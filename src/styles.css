@@ -154,8 +154,6 @@ dialog::backdrop { background:#061711a8; }
 .history p { margin:5px 0; }
 .toast { position:fixed; right:20px; bottom:20px; z-index:10; padding:12px 16px; display:flex; align-items:center; gap:9px; border-radius:8px; background:var(--sidebar); color:white; box-shadow:0 7px 22px #00191037; }
 .standalone { max-width:500px; margin:12vh auto 0; padding:24px; }
-.sign-in { display:grid; gap:14px; }
-.sign-in h1 { font-size:2rem; }
 .presenting { padding-left:0; }
 .presentation-bar { position:sticky; top:0; z-index:4; background:var(--panel); border-bottom:1px solid var(--line); padding:12px 3vw; display:flex; gap:10px; flex-wrap:wrap; justify-content:space-between; align-items:center; }
 .presentation-bar>div:last-child { display:flex; align-items:center; gap:9px; }

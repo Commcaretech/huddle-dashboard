@@ -19,7 +19,6 @@
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.3.0",
-    "@neondatabase/auth": "0.6.0-beta",
     "@tanstack/react-query": "^5.0.0",
     "@vercel/functions": "3.11.4",
     "drizzle-orm": "^0.45.4",
@@ -46,10 +45,5 @@
     "typescript": "~5.9.0",
     "vite": "^7.0.0",
     "vitest": "^5.1.2"
-  },
-  "overrides": {
-    "better-auth": "1.7.28",
-    "@better-auth/drizzle-adapter": "1.7.28",
-    "zod": "$zod"
   }
 }

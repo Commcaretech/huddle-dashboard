@@ -11,12 +11,12 @@ npm.cmd ci
 npm.cmd run dev
 ```
 
-Open [http://127.0.0.1:5173](http://127.0.0.1:5173). Demo mode is loopback-only, uses an isolated local PostgreSQL-compatible PGlite database, and comes with labelled synthetic records. Production uses Neon PostgreSQL and Neon Auth.
+Open [http://127.0.0.1:5173](http://127.0.0.1:5173). Demo mode is loopback-only, uses an isolated local PostgreSQL-compatible PGlite database, and comes with labelled synthetic records. Production uses Neon PostgreSQL with shared workspace access.
 
 ## What is available
 
 - Exactly 13 primary reporting routes, combined and individual centre views, financial year filtering, light and dark themes, and full-screen meeting presentation.
-- Managed centre, period, branding and user-access settings with backend permission checks.
+- Managed centre, period and branding settings in a shared workspace.
 - Manual create, edit, archive and restore for practices and challenges, developments, training and logistics. Developments share one record across recent, upcoming and roadmap views.
 - Conclusions on each tab, with validated action fields, a global action tracker, status history and unresolved actions carried across reporting periods.
 - Read-only Data Sources registry, normalised metric contract and initial integration persistence. Analytical tabs surface unavailable states until approved data flows exist.
@@ -27,7 +27,7 @@ Open [http://127.0.0.1:5173](http://127.0.0.1:5173). Demo mode is loopback-only,
 | --- | --- |
 | `src/` | React workspace, reporting forms, actions, administration and styles |
 | `shared/` | Tab and field definitions plus Singapore reporting date utilities |
-| `server/` | Express routes, authentication adapter, validation and permissions |
+| `server/` | Express routes, workspace scoping and validation |
 | `server/db/` | Drizzle schema, runtime connections, migrations runner and explicit bootstrap |
 | `server/integrations/` | Source registry and versioned data contract |
 | `migrations/` | Versioned PostgreSQL DDL and Drizzle metadata |

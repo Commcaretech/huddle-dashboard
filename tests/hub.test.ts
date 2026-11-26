@@ -17,7 +17,7 @@ let url:string;
 beforeAll(async()=>{
   connection=await connectDemo(true);
   await seedDemo(connection.db);
-  server=createServer(createApp(connection.db,{demo:true,demoSubject,allowedOrigins:[origin]}));
+  server=createServer(createApp(connection.db,{demo:true,actorSubject:demoSubject,allowedOrigins:[origin]}));
   await new Promise<void>(resolve=>server.listen(0,'127.0.0.1',resolve));
   const address=server.address();
   if(!address||typeof address==='string') throw new Error('Expected a port.');

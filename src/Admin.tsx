@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Building2, CalendarDays, Database, Settings2, Users } from 'lucide-react';
+import { Building2, CalendarDays, Database, Settings2 } from 'lucide-react';
 import { addDays, fortnight, periodKinds, singaporeToday } from '../shared/reporting';
-import { api, dateLabel, roleNames, type Centre, type DataSource, type Profile, type Role, type Workspace } from './api';
+import { api, dateLabel, type Centre, type DataSource, type Workspace } from './api';
 import { Badge, Empty, Failure, Field, Loading, Modal, SaveForm, value } from './ui';
 
-const views=[['Centres',Building2],['Periods',CalendarDays],['Organisation',Settings2],['User access',Users],['Data sources',Database]] as const;
+const views=[['Centres',Building2],['Periods',CalendarDays],['Organisation',Settings2],['Data sources',Database]] as const;
 type View = typeof views[number][0];
 export function Admin({workspace,initial,refresh}:{workspace:Workspace;initial:View;refresh:(message:string)=>void}) {
   const [view,setView]=useState<View>(initial);
@@ -16,7 +16,6 @@ export function Admin({workspace,initial,refresh}:{workspace:Workspace;initial:V
       {view==='Centres'&&<Centres workspace={workspace} refresh={refresh}/>}
       {view==='Periods'&&<Periods workspace={workspace} refresh={refresh}/>}
       {view==='Organisation'&&<Organisation workspace={workspace} refresh={refresh}/>}
-      {view==='User access'&&<Profiles workspace={workspace} refresh={refresh}/>}
       {view==='Data sources'&&<Sources workspace={workspace} refresh={refresh}/>}
     </section>
   </>;
@@ -68,26 +67,6 @@ function Organisation({workspace,refresh}:SettingsProps) {
         {Array.from({length:12},(_,index)=><option key={index} value={index+1}>{new Intl.DateTimeFormat('en-SG',{month:'long',timeZone:'UTC'}).format(new Date(Date.UTC(2026,index,1)))}</option>)}</select></Field>
       <Field label="Fortnight anchor date"><input name="fortnightAnchor" type="date" required defaultValue={workspace.settings.fortnightAnchor}/></Field>
     </SaveForm></div></>;
-}
-function Profiles({workspace,refresh}:SettingsProps) {
-  const [edit,setEdit]=useState<Profile|null|undefined>();
-  const profiles=useQuery({queryKey:['profiles'],queryFn:()=>api<Profile[]>('/admin/profiles')});
-  return <>
-    <div className="panel-heading"><div><h2>Reporting profiles</h2><p>Assign centre access using the user ID from Neon Auth.</p></div><button className="primary" onClick={()=>setEdit(null)}>Add profile</button></div>
-    {profiles.isPending?<Loading/>:profiles.isError?<Failure error={profiles.error}/>:<div className="table-wrap"><table><thead><tr><th>Name</th><th>Role</th><th>Status</th><th>Centres</th><th>Manage</th></tr></thead><tbody>
-      {profiles.data.map(profile=><tr key={profile.id}><td>{profile.name}</td><td>{roleNames[profile.role]}</td><td>{profile.active?'Active':'Inactive'}</td><td>{profile.role.startsWith('hq_')?'Organisation-wide':workspace.centres.filter(centre=>profile.centreIds.includes(centre.id)).map(centre=>centre.name).join(', ')||'No access'}</td><td>{profile.id!==workspace.user.id&&<button onClick={()=>setEdit(profile)}>Edit</button>}</td></tr>)}</tbody></table></div>}
-    {edit!==undefined&&<Modal title={edit?'Edit reporting profile':'Add reporting profile'} close={()=>setEdit(undefined)}>
-      <SaveForm onDone={()=>{setEdit(undefined);refresh('Profile saved');}} onSave={data=>api(edit?'/admin/profiles/'+edit.id:'/admin/profiles',edit?'PUT':'POST',{
-        subject:value(data,'subject'),name:value(data,'name'),role:value(data,'role'),active:data.has('active'),centreIds:data.getAll('centreIds')
-      })}>
-        <Field label="Display name"><input name="name" required maxLength={160} defaultValue={edit?.name}/></Field>
-        <Field label="Neon Auth user ID"><input name="subject" required maxLength={160} defaultValue={edit?.subject}/></Field>
-        <Field label="Role"><select name="role" defaultValue={edit?.role??'centre_staff'}>{Object.entries(roleNames).map(([key,name])=><option key={key} value={key as Role}>{name}</option>)}</select></Field>
-        <label className="checkbox"><input type="checkbox" name="active" defaultChecked={edit?.active??true}/> Active profile</label>
-        <div className="wide"><strong>Centre permissions</strong>{workspace.centres.map(centre=><label className="checkbox" key={centre.id}><input type="checkbox" name="centreIds" value={centre.id} defaultChecked={edit?.centreIds.includes(centre.id)}/>{centre.name}</label>)}</div>
-      </SaveForm>
-    </Modal>}
-  </>;
 }
 function Sources({workspace,refresh}:SettingsProps) {
   const [key,setKey]=useState('');

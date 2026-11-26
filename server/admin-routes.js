@@ -1,8 +1,8 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import { and, desc, eq } from 'drizzle-orm';
-import { organisations, centres, periods, settings, users, grants, aliases, sources, syncJobs } from './db/schema.js';
-import { centreInput, periodInput, settingsInput, profileInput, short, uid } from './validation-hub.js';
+import { organisations, centres, periods, settings, aliases, sources, syncJobs } from './db/schema.js';
+import { centreInput, periodInput, settingsInput, short, uid } from './validation-hub.js';
 import { requireAccess, RequestError, log } from './report-routes.js';
 import { sourceRegistry } from './integrations/contracts.js';
 
@@ -61,36 +61,6 @@ export function adminRoutes(db, config) {
     });
     res.json({saved:true});
   });
-  router.get('/admin/profiles', async (req,res) => {
-    const [profiles, permissions] = await Promise.all([
-      db.select().from(users).where(eq(users.orgId,req.actor.orgId)).orderBy(users.name),
-      db.select().from(grants).where(eq(grants.orgId,req.actor.orgId))
-    ]);
-    res.json(profiles.map(profile => ({...profile,centreIds:permissions.filter(grant => grant.userId === profile.id).map(grant => grant.centreId)})));
-  });
-  async function saveProfile(req,res) {
-    const input = profileInput.parse(req.body);
-    const id = req.params.id ? uid.parse(req.params.id) : null;
-    if (id === req.actor.id) throw new RequestError(409,'Another administrator must change your own access.');
-    const {centreIds,...profile} = input;
-    const uniqueIds = [...new Set(centreIds)];
-    requireAccess(uniqueIds.every(centreId => req.actor.centres.some(centre => centre.id === centreId)));
-    const orgId = req.actor.orgId;
-    const saved = await db.transaction(async tx => {
-      const [row] = id
-        ? await tx.update(users).set({...profile,updatedAt:new Date()}).where(and(eq(users.orgId,orgId),eq(users.id,id))).returning()
-        : await tx.insert(users).values({...profile,orgId}).returning();
-      if (!row) throw new RequestError(404,'Profile was not found.');
-      await tx.delete(grants).where(and(eq(grants.orgId,orgId),eq(grants.userId,row.id)));
-      if (uniqueIds.length) await tx.insert(grants).values(uniqueIds.map(centreId => ({centreId,orgId,userId:row.id})));
-      await log(tx,req.actor,id ? 'profile.updated' : 'profile.created',row.id);
-      return row;
-    });
-    res.status(id ? 200 : 201).json(saved);
-  }
-  router.post('/admin/profiles',saveProfile);
-  router.put('/admin/profiles/:id',saveProfile);
-
   router.get('/admin/sources', async (req,res) => {
     const orgId = req.actor.orgId;
     const [configured, mappings] = await Promise.all([

@@ -1,31 +1,55 @@
 # Neon setup
 
-Create the project in an organisation-owned Neon account. Use separate production and development branches with branch-specific Auth configuration. Use synthetic or explicitly approved de-identified data on development branches. Confirm identity settings separately after branching.
-
-## Variables
-
-| Setting | Use |
-| --- | --- |
-| `HUB_MODE=postgres` | Enables Neon-backed runtime and authentication |
-| `DATABASE_URL` | Pooled PostgreSQL URL for the runtime role |
-| `DATABASE_URL_UNPOOLED` | Direct PostgreSQL URL for migrations and bootstrap; use only on the administrative workstation |
-| `APP_URL` | Canonical HTTPS origin |
-| `NEON_AUTH_BASE_URL` | HTTPS Managed Better Auth branch URL copied from the Neon Console |
-| `SESSION_SECRET` | Random secret of at least 32 characters for the Neon Auth proxy's session cookie |
-| `BOOTSTRAP_ORGANISATION`, `BOOTSTRAP_ADMIN_SUBJECT`, `BOOTSTRAP_ADMIN_NAME` | Used only by the explicit bootstrap command |
-
-Enable Managed Better Auth, configure email/password accounts and verification, set the application origin in the Neon Auth settings, and provision a verified administrator. Copy the user ID from Neon Auth. Use an approved SMTP/provider configuration if your environment needs it. Only an active matching reporting profile grants application access.
-
-Confirm the branch and database identity from the administrative connection, then run:
+In the Neon Console, open your project and click **Connect**. Select the correct branch and database, select the owner role, and turn **Connection pooling** off. Copy the direct PostgreSQL URL, then run these commands from the project directory:
 
 ```powershell
 npm.cmd ci
+$env:DATABASE_URL_UNPOOLED = (Get-Clipboard -Raw).Trim()
+$env:BOOTSTRAP_ORGANISATION = Read-Host 'Enter the organisation name for a new database'
 npm.cmd run db:migrate
-npm.cmd run db:setup
+if ($LASTEXITCODE -eq 0) { npm.cmd run db:setup }
 ```
 
-The migration runner applies [0000_productive_robin_chapel.sql](../migrations/0000_productive_robin_chapel.sql) using Drizzle's tracked migration journal. Setup creates the organisation, calendar settings and administrator. Existing profiles with the same administrator subject are left intact. Run the commands on a test branch before applying to production.
+Expect `Migrations applied.` and `Shared workspace available.` The migration applies [0000_productive_robin_chapel.sql](../migrations/0000_productive_robin_chapel.sql) through the Drizzle journal. Setup reuses the organisation if exactly one already exists and preserves existing records. For a database containing multiple organisations, query `SELECT id, name FROM public.organisations;` in Neon SQL Editor, then set `$env:BOOTSTRAP_ORGANISATION_ID` to the intended ID before rerunning setup.
 
-Provision a distinct runtime role. Grant database connection and schema usage plus select and the required insert/update permissions on Hub tables. The runtime needs delete on `user_centre_permissions` and `centre_aliases` to replace profile grants and remove unused mappings. Give the runtime role no migration/schema ownership and no access to individual source records. Use the direct admin URL only for controlled setup and schema changes.
+The shared workspace is used for all reads, writes and audit attribution. Keep the owner URL and bootstrap values on the workstation. Put the pooled runtime connection in Vercel as described below.
 
-The Express adapter uses the official SDK's framework-agnostic request proxy and allowlists email sign-in, session verification and sign-out. The SDK handles the Auth cookies. No additional application login library or browser database SDK is required. Consult [Neon Auth](https://neon.com/docs/auth/quick-start/react) and the [SDK adapter reference](https://github.com/neondatabase/neon-js/blob/main/packages/auth/BUILDING-AN-ADAPTER.md).
+## Give the Vercel database login access
+
+After running the migration, generate a database password in PowerShell:
+
+```powershell
+node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))" | Set-Clipboard
+```
+
+In Neon, open **SQL Editor**, select the reporting branch and database, and run the following. Replace the placeholder with the generated password and use your own database name in the `GRANT CONNECT` statement if it differs from `neondb`.
+
+```sql
+CREATE ROLE huddle_app LOGIN PASSWORD 'PASTE_GENERATED_PASSWORD_HERE';
+
+GRANT CONNECT ON DATABASE neondb TO huddle_app;
+GRANT USAGE ON SCHEMA public TO huddle_app;
+
+GRANT SELECT ON
+  public.organisations, public.application_settings, public.centres,
+  public.user_profiles, public.user_centre_permissions, public.reporting_periods,
+  public.report_entries, public.action_items, public.action_history,
+  public.integration_sources, public.centre_aliases, public.sync_jobs
+TO huddle_app;
+
+GRANT INSERT ON
+  public.application_settings, public.centres, public.user_profiles,
+  public.user_centre_permissions, public.reporting_periods, public.report_entries,
+  public.action_items, public.action_history, public.integration_sources,
+  public.centre_aliases, public.audit_logs
+TO huddle_app;
+
+GRANT UPDATE ON
+  public.organisations, public.application_settings, public.centres,
+  public.user_profiles, public.report_entries, public.action_items
+TO huddle_app;
+
+GRANT DELETE ON public.user_centre_permissions, public.centre_aliases TO huddle_app;
+```
+
+In **Connect**, select the **huddle_app** role and turn **Connection pooling** on. Copy the full URL into Vercel's **DATABASE_URL**. If the URL contains a password placeholder, replace it with the password you just generated.

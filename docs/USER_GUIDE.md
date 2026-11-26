@@ -1,5 +1,7 @@
 # User guide
 
+- Open the dashboard link to browse and use the shared workspace. Use Workspace settings to manage centres and reporting dates.
+
 - Choose a Centre, Reporting period and Financial year in the header. Combined HQ includes centres the account can access.
 - Use Add practice or challenge, Add development, Add training record, or Add logistics request. Use Edit to update the saved record and Archive for reversible removal. Select Archived and Restore to recover it.
 - For upcoming programme developments, select Management highlight to include them in Next Two Weeks. Use Calendar or Roadmap to change the view. A development can appear in both future views under the same record.

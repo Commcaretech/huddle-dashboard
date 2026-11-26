@@ -1,8 +1,6 @@
 # Security
 
-- Organisational access and centre grants are validated on the backend. Writes also require an active centre and an editor role.
-- Neon Auth validates identity using an HTTPS proxy. The application requires a verified email and active profile, checks write origins, limits JSON requests and rate-limits API and auth traffic.
-- Drizzle parameterises data queries. Restrict runtime database privileges to Hub tables. Protect the migration and Neon Auth administration roles separately.
-- Avoid participant identifiers, raw assessment results, private leave reasons and other confidential details in free text. Use approved HTTPS document references with their own access controls.
-- Keep Neon and Vercel settings, secrets, credentials and backup ownership within the organisation. Demo mode is loopback-only and blocked in hosted mode.
-- Verify production cookies, identity access, error logging, storage and role isolation before onboarding staff. Hosted authentication and live data connections require environment-specific checks.
+- Anyone who can reach the deployment can read and edit reporting records and use Workspace settings. A public deployment is suitable for synthetic data. Restrict real-data deployments at the hosting or network layer.
+- API requests use one configured organisation and a shared actor. Audit history identifies the shared actor rather than individual people.
+- The server checks write origins, validates data, limits request size and rate-limits API calls. These controls do not establish visitor identity.
+- Keep the Neon runtime and migration credentials private. Use a limited runtime role and keep the owner connection on the administrative workstation.

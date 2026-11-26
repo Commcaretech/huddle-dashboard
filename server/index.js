@@ -8,10 +8,10 @@ import { postgresConfig } from './config.js';
 const production = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1';
 const mode = z.enum(['demo','postgres']).parse(process.env.HUB_MODE ?? (production ? 'postgres' : 'demo'));
 const demo = mode === 'demo';
-if (production && demo) throw new Error('Hosted environments require PostgreSQL and Neon Auth.');
+if (production && demo) throw new Error('Hosted environments require PostgreSQL.');
 const port = z.coerce.number().int().min(1).max(65535).parse(process.env.PORT ?? 3001);
 const config = demo ? {
-  demo, demoSubject,
+  demo, actorSubject:demoSubject,
   allowedOrigins:[new URL(process.env.APP_URL || 'http://127.0.0.1:5173').origin,
     'http://127.0.0.1:' + port,'http://localhost:' + port,'http://localhost:5173','http://127.0.0.1:5173']
 } : postgresConfig(process.env);

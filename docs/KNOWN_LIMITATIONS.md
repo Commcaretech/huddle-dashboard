@@ -5,4 +5,4 @@
 - Data Sources shows adapter availability. Live credentials, field-level mapping, connection tests, sync, failed-job recovery and scheduling are Phase 4.
 - Reporting approval, immutable meeting snapshots, management decisions, reports export and deterministic analytical insights are Phase 5. Current presentations use the live report selection.
 - Training, procurement and planning offer manual record tracking. Calendar and roadmap are reporting views. Imported deadlines, attachments storage and additional approval automation are pending.
-- Production Neon sign-in, branch migration and Vercel deployment need real environment configuration and verification.
+- Production Neon branch setup and Vercel deployment need real environment configuration and verification.

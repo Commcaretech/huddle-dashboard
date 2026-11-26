@@ -10,10 +10,6 @@ export const centreInput = z.object({ name:short, code:z.string().trim().regex(/
 export const periodInput = z.object({ name:short, kind:z.enum(periodKinds), start:z.iso.date(), end:z.iso.date() }).strict()
   .refine(p => p.end >= p.start, {path:['end'],message:'End date must be on or after the start date.'});
 export const settingsInput = z.object({ name:short, logoUrl:https.nullable(), fiscalStartMonth:z.number().int().min(1).max(12), fortnightAnchor:z.iso.date() }).strict();
-export const profileInput = z.object({
-  subject:short, name:short, active:z.boolean(), role:z.enum(['hq_admin','hq_viewer','centre_manager','centre_staff','restricted_viewer']),
-  centreIds:z.array(uid).max(100)
-}).strict();
 export const entryInput = z.object({
   centreId:uid, periodId:uid, kind:z.enum(['practice','development','training','logistics']),
   title:short, category:short, status:short, date:z.iso.date(), dueDate:z.iso.date().nullable(),

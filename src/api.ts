@@ -15,7 +15,6 @@ export type Action = {
   priority:string; status:string; progress:number; evidence:string; completedAt:string|null; createdAt:string;
   overdue:boolean; carriedForward:boolean; periodName:string;
 };
-export type Profile = {id:string; name:string; subject:string; role:Role; active:boolean; centreIds:string[]};
 export type DataSource = {key:string; name:string; type:string; datasets:string[]; status:string; history:unknown[]; aliases:{id:string;centreId:string;alias:string}[]};
 export class ApiError extends Error {
   status:number;
@@ -34,10 +33,6 @@ export function params(values:Record<string,string|number|undefined>) {
   for (const [key,value] of Object.entries(values)) if (value !== undefined && value !== '') result.set(key,String(value));
   return '?' + result.toString();
 }
-export const roleNames:Record<Role,string> = {
-  hq_admin:'HQ administrator',hq_viewer:'HQ viewer',centre_manager:'Centre manager',
-  centre_staff:'Centre staff',restricted_viewer:'Restricted viewer'
-};
 export function dateLabel(date:string) {
   return new Intl.DateTimeFormat('en-SG',{day:'numeric',month:'short',year:'numeric',timeZone:'Asia/Singapore'}).format(new Date(date));
 }

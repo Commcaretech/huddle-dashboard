@@ -2,15 +2,15 @@ import { connectPostgres } from './postgres.js';
 import { bootstrap } from './seed.js';
 import { z } from 'zod';
 
-const required = z.string().trim().min(1).max(160);
-const config = z.object({organisation:required,subject:required,name:required}).parse({
-  organisation:process.env.BOOTSTRAP_ORGANISATION, subject:process.env.BOOTSTRAP_ADMIN_SUBJECT,
-  name:process.env.BOOTSTRAP_ADMIN_NAME
+const organisationName = z.string().trim().min(1).max(160).optional();
+const config = z.object({organisation:organisationName,orgId:z.uuid().optional()}).parse({
+  organisation:process.env.BOOTSTRAP_ORGANISATION || undefined,
+  orgId:process.env.BOOTSTRAP_ORGANISATION_ID || undefined
 });
 const connection = connectPostgres(process.env.DATABASE_URL_UNPOOLED);
 try {
   await bootstrap(connection.db, config);
-  console.log('Organisation administrator available.');
+  console.log('Shared workspace available.');
 } finally {
   await connection.close();
 }

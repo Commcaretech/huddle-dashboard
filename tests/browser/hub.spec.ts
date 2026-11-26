@@ -33,3 +33,12 @@ test('mobile sidebar, theme and source registry are reachable',async({page})=>{
   await expect(page.getByRole('heading',{name:'Source registry'})).toBeVisible();
   await expect(page.getByText('Awaiting adapter',{exact:true})).toHaveCount(9);
 });
+
+test('a fresh browser opens reports and workspace settings directly',async({page})=>{
+  await page.goto('/next-two-weeks');
+  await expect(page.getByRole('heading',{name:'Next Two Weeks',exact:true})).toBeVisible();
+  await expect(page.getByLabel('Centre',{exact:true})).toBeVisible();
+  await expect(page.getByRole('button',{name:/sign in|sign out/i})).toHaveCount(0);
+  await page.getByRole('button',{name:'Workspace settings'}).click();
+  await expect(page.getByRole('heading',{name:'Centre registry'})).toBeVisible();
+});

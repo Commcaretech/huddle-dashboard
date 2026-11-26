@@ -1,22 +1,18 @@
-# Deploy to Vercel
+﻿# Deploy to Vercel
 
-1. Apply the migration and bootstrap the first administrator on the intended Neon branch from a trusted workstation. See [Neon setup](NEON_SETUP.md).
-2. In the organisation's Vercel workspace, import the Git repository and select its root directory. Use the Vite framework preset and Node.js 24.x. The checked-in `vercel.json` sets the build command, output directory, Singapore function region (`sin1`), and routing.
-3. In **Settings → Environment Variables**, set the following values for **Production**. Deploy after saving them.
+1. Open the intended Neon branch and set up the database from PowerShell. Follow [Neon setup](NEON_SETUP.md). If you previously set up the dashboard with individual accounts, rerun `npm.cmd run db:setup` after pulling the new code to register the shared workspace against the existing organisation.
+2. In Vercel, click **Add New → Project** and import the GitHub repository. Use its root directory, the **Vite** preset and **Node.js 24.x**. The checked-in `vercel.json` sets the output directory and routing.
+3. Open **Project → Settings → Environment Variables**. Add these values for **Production** and redeploy.
 
 | Variable | Value |
 | --- | --- |
 | `HUB_MODE` | `postgres` |
-| `APP_URL` | The canonical HTTPS origin, for example `https://your-hub.vercel.app` |
+| `APP_URL` | The exact HTTPS production origin from **Settings → Domains** |
 | `DATABASE_URL` | The pooled Neon connection URL for the runtime role |
-| `NEON_AUTH_BASE_URL` | The Managed Better Auth URL from the same Neon branch |
-| `SESSION_SECRET` | A randomly generated secret of at least 32 characters |
 
-4. Add the exact `APP_URL` to Neon Auth's trusted origins. Open that domain when signing in or making reporting edits.
-5. After deploying, check `/api/healthz` for `{"ready":true}`, refresh a direct reporting link such as `/next-two-weeks`, and test sign-in, a scoped reporting write, and sign-out.
+4. Wait for **Ready** in **Deployments**. Open your production domain followed by `/api/healthz`. The response should be `{"ready":true}`.
+5. Open the homepage in a private window. The workspace opens directly. Click **Workspace settings** to add a centre and reporting period, then save and refresh a test entry.
 
-Vercel serves the Vite output and forwards same-origin API requests to a Node.js Function that runs the existing Express app. Neon owns persistent storage. Migrations and bootstrap run separately, so the direct database URL and bootstrap values belong on the administrative workstation. The local demo and its files stay on your computer.
+The app uses a shared workspace identity. Anyone who can reach an unprotected deployment can read and edit records and change workspace settings. Use synthetic data on public deployments, or restrict access at the hosting or network layer before using real records. Keep the direct database URL on your administrative workstation.
 
-For a hosted preview, use a separate Neon branch, preview credentials and a stable preview origin configured in both Vercel and Neon Auth. The write-origin check uses the configured `APP_URL`.
-
-[Vite on Vercel](https://vercel.com/docs/frameworks/frontend/vite) · [Vercel Function database pooling](https://vercel.com/docs/functions/functions-api-reference/vercel-functions-package)
+[Vercel Vite deployment](https://vercel.com/docs/frameworks/frontend/vite) · [Vercel environment variables](https://vercel.com/docs/environment-variables)

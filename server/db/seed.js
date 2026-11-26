@@ -1,6 +1,8 @@
-import { and, eq } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { organisations, centres, periods, users, settings, entries } from './schema.js';
 import { addDays, fortnight, singaporeToday } from '../../shared/reporting.ts';
+
+import { workspaceSubject } from '../config.js';
 
 export const demoSubject = 'local-synthetic-demo';
 const demoId = '00000000-0000-4000-8000-000000000001';
@@ -32,16 +34,29 @@ export async function seedDemo(db) {
   });
 }
 
-export async function bootstrap(db, config) {
+export async function bootstrap(db, { organisation, orgId }) {
   return db.transaction(async tx => {
-    const [existing] = await tx.select().from(users).where(eq(users.subject, config.subject));
+    const [existing] = await tx.select().from(users).where(eq(users.subject,workspaceSubject));
     if (existing) {
-      if (existing.role !== 'hq_admin') throw new Error('Subject is already assigned another role.');
+      if (!existing.active || existing.role !== 'hq_admin' || (orgId && existing.orgId !== orgId)) {
+        throw new Error('The shared workspace record is already configured and cannot be reassigned automatically.');
+      }
       return existing;
     }
-    const [org] = await tx.insert(organisations).values({ name:config.organisation }).returning();
-    await tx.insert(settings).values({orgId:org.id});
-    const [admin] = await tx.insert(users).values({orgId:org.id,subject:config.subject,name:config.name,role:'hq_admin'}).returning();
-    return admin;
+
+    const candidates = await tx.select().from(organisations)
+      .where(orgId ? eq(organisations.id,orgId) : undefined).limit(2);
+    if (candidates.length > 1) throw new Error('Set BOOTSTRAP_ORGANISATION_ID to select the existing organisation.');
+    if (orgId && !candidates.length) throw new Error('The selected organisation does not exist.');
+    let org = candidates[0];
+    if (!org) {
+      if (!organisation) throw new Error('Set BOOTSTRAP_ORGANISATION to create the first organisation.');
+      [org] = await tx.insert(organisations).values({name:organisation}).returning();
+    }
+    await tx.insert(settings).values({orgId:org.id}).onConflictDoNothing();
+    const [actor] = await tx.insert(users).values({
+      orgId:org.id,subject:workspaceSubject,name:'Shared workspace',role:'hq_admin'
+    }).returning();
+    return actor;
   });
 }
