@@ -1,6 +1,6 @@
-﻿# Deploy to Vercel
+# Deploy to Vercel
 
-1. Open the intended Neon branch and set up the database from PowerShell. Follow [Neon setup](NEON_SETUP.md). If you previously set up the dashboard with individual accounts, rerun `npm.cmd run db:setup` after pulling the new code to register the shared workspace against the existing organisation.
+1. In Neon, open **SQL Editor** for the branch and database used by Vercel. Run the [browser setup script](neon-browser-setup.sql) and look for **Shared workspace available**. [Neon setup and database role grants](NEON_SETUP.md).
 2. In Vercel, click **Add New → Project** and import the GitHub repository. Use its root directory, the **Vite** preset and **Node.js 24.x**. The checked-in `vercel.json` sets the output directory and routing.
 3. Open **Project → Settings → Environment Variables**. Add these values for **Production** and redeploy.
 

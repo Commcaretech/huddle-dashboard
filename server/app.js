@@ -19,7 +19,10 @@ export function createApp(db, config) {
   app.get(['/healthz','/api/healthz'], async (_req,res) => {
     res.set('Cache-Control','no-store');
     try { const actor = await loadActor(db,config.actorSubject); res.status(actor ? 200 : 503).json({ready:!!actor}); }
-    catch { res.status(503).json({ready:false}); }
+    catch (error) {
+      console.error('Reporting database readiness check failed',error.cause?.code ?? error.code ?? error.name);
+      res.status(503).json({ready:false});
+    }
   });
   app.use('/api', (req,res,next) => {
     res.set('Cache-Control','no-store');

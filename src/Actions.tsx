@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { actionStatuses, priorities, tabs } from '../shared/reporting';
+import { actionStatuses, priorities, tabs } from '../shared/reporting.js';
 import { api, canWrite, dateLabel, params, type Action, type Period, type Workspace } from './api';
 import { Badge, Empty, Failure, Field, Loading, Modal, PageControls, SaveForm, value } from './ui';
 

@@ -1,5 +1,15 @@
 # Neon setup
 
+## Browser setup
+
+1. Open [neon.tech](https://console.neon.tech/) and choose the project, branch and database used by Vercel.
+2. Click **SQL Editor** and open a new query. Select the database owner if the editor shows a role selector.
+3. Open [neon-browser-setup.sql](neon-browser-setup.sql), copy the entire file, paste it in the editor and click **Run**. Edit the organisation name at the top if this is a new database.
+4. Check the results for **Shared workspace available**. The script initialises a fresh database or reuses a single existing organisation. It can be rerun. If an existing database has multiple organisations and no shared workspace, set the intended UUID in `preferred_org`.
+5. If the Vercel runtime role still needs to be created or granted access, use the role SQL below. You can generate the role password in your password manager.
+
+## PowerShell setup
+
 In the Neon Console, open your project and click **Connect**. Select the correct branch and database, select the owner role, and turn **Connection pooling** off. Copy the direct PostgreSQL URL, then run these commands from the project directory:
 
 ```powershell

@@ -1,22 +1,37 @@
-import { attachDatabasePool } from '@vercel/functions';
-import { createApp } from '../server/app.js';
-import { postgresConfig } from '../server/config.js';
-import { connectPostgres } from '../server/db/postgres.js';
+import express from 'express';
 
-let app;
-export default function handler(req, res) {
-  if (!app) {
-    try {
-      const config = postgresConfig(process.env);
-      const { db, pool } = connectPostgres(process.env.DATABASE_URL, { max:2, idleTimeoutMillis:5000 });
-      attachDatabasePool(pool);
-      app = createApp(db, { ...config, trustProxy:true, serveFrontend:false });
-    } catch {
-      res.statusCode = 503;
-      res.setHeader('Content-Type','application/json; charset=utf-8');
-      res.setHeader('Cache-Control','no-store');
-      return res.end(JSON.stringify({ error:'The reporting service is not configured.' }));
-    }
+let appPromise;
+
+async function initialise(env) {
+  const { postgresConfig } = await import('../server/config.js');
+  const config = postgresConfig(env);
+  const [{ createApp }, { connectPostgres }, { attachDatabasePool }] = await Promise.all([
+    import('../server/app.js'),
+    import('../server/db/postgres.js'),
+    import('@vercel/functions')
+  ]);
+  const connection = connectPostgres(env.DATABASE_URL, { max:2, idleTimeoutMillis:5000 });
+  try {
+    attachDatabasePool(connection.pool);
+    return createApp(connection.db, { ...config, trustProxy:true, serveFrontend:false });
+  } catch (error) {
+    await connection.close();
+    throw error;
+  }
+}
+
+async function handler(req, res) {
+  let app;
+  try {
+    appPromise ??= initialise(process.env);
+    app = await appPromise;
+  } catch (error) {
+    appPromise = undefined;
+    console.error('Reporting function failed to initialise', error?.code ?? error?.name);
+    res.statusCode = 503;
+    res.setHeader('Content-Type','application/json; charset=utf-8');
+    res.setHeader('Cache-Control','no-store');
+    return res.end(JSON.stringify({ error:'The reporting service could not start. Check the Vercel runtime logs.' }));
   }
 
   // Restore the API path if the platform supplies the rewrite destination.
@@ -30,3 +45,9 @@ export default function handler(req, res) {
   }
   return app(req, res);
 }
+
+// A native Express entry point lets Express consume request bodies directly.
+const entrypoint = express();
+entrypoint.disable('x-powered-by');
+entrypoint.use(handler);
+export default entrypoint;

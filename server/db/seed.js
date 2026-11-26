@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm';
 import { organisations, centres, periods, users, settings, entries } from './schema.js';
-import { addDays, fortnight, singaporeToday } from '../../shared/reporting.ts';
+import { addDays, fortnight, singaporeToday } from '../../shared/reporting.js';
 
 import { workspaceSubject } from '../config.js';
 

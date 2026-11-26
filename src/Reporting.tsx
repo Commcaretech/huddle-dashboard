@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Activity, BarChart3, CalendarDays, ClipboardCheck, Layers3, Plus, Search } from 'lucide-react';
 import { api, canWrite, dateLabel, params, type Centre, type Entry, type Period, type Report, type Workspace } from './api';
-import { addDays, dateWindow, modules, priorities, singaporeToday, type Tab } from '../shared/reporting';
+import { addDays, dateWindow, modules, priorities, singaporeToday, type Tab } from '../shared/reporting.js';
 import { Badge, Empty, Failure, Field, Loading, Modal, PageControls, SaveForm, value } from './ui';
 
 type Props = {tab:Tab; workspace:Workspace; centreId:string; period:Period; presenting:boolean; refresh:(message:string)=>void};

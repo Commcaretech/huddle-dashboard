@@ -1,4 +1,4 @@
-export const tabs = [
+export const tabs = /** @type {const} */ ([
   { id: 'kpi-performance', name: 'KPI Performance', group: 'Performance', description: 'Track targets, attainment and period comparisons across centres.', indicators: ['Annual target', 'Current attainment', 'Previous period', 'Year-on-year change'] },
   { id: 'good-practices', name: 'Good Practices and Challenges', group: 'Performance', description: 'Capture what worked, where teams encountered difficulties and what other centres can learn.', indicators: [], module: 'practice' },
   { id: 'recent-developments', name: 'Recent Developments', group: 'Performance', description: 'Review milestones, findings and outcomes for the selected dates.', indicators: [], module: 'development' },
@@ -12,14 +12,15 @@ export const tabs = [
   { id: 'logistics', name: 'Logistics', group: 'Operations', description: 'Follow requests from submission to approval, procurement and completion.', indicators: [], module: 'logistics' },
   { id: 'next-two-weeks', name: 'Next Two Weeks', group: 'Planning', description: 'Prepare for management highlights and deadlines in the next fourteen days.', indicators: [], module: 'development' },
   { id: 'next-three-months', name: 'Next Three Months', group: 'Planning', description: 'Track initiatives, dependencies and milestones across the next three months.', indicators: [], module: 'development' }
-] as const;
-export type Tab = typeof tabs[number];
-export const priorities = ['Low', 'Normal', 'High', 'Urgent'] as const;
-export const actionStatuses = ['Pending', 'In progress', 'Blocked', 'Completed'] as const;
-export const periodKinds = ['Fortnightly', 'Monthly', 'Quarterly', 'Annual', 'Financial year', 'Custom', 'Year to date'] as const;
-type Field = { key: string; label: string; required?: boolean; type?: 'money' | 'percent' | 'quantity' | 'url' | 'date' };
-type Module = { item: string; date: string; due: string; categories: readonly string[]; statuses: readonly string[]; fields: Field[] };
-export const modules: Record<string, Module> = {
+]);
+/** @typedef {(typeof tabs)[number]} Tab */
+export const priorities = /** @type {const} */ (['Low', 'Normal', 'High', 'Urgent']);
+export const actionStatuses = /** @type {const} */ (['Pending', 'In progress', 'Blocked', 'Completed']);
+export const periodKinds = /** @type {const} */ (['Fortnightly', 'Monthly', 'Quarterly', 'Annual', 'Financial year', 'Custom', 'Year to date']);
+/** @typedef {{key:string, label:string, required?:boolean, type?:'money'|'percent'|'quantity'|'url'|'date'}} Field */
+/** @typedef {{item:string, date:string, due:string, categories:readonly string[], statuses:readonly string[], fields:Field[]}} Module */
+/** @type {Record<string, Module>} */
+export const modules = {
   practice: {
     item: 'practice or challenge', date: 'Observation date', due: 'Follow-up date', categories: ['Outreach', 'HSAR', 'Other'], statuses: ['Good practice', 'Challenge'],
     fields: [{key:'description', label:'Description', required:true}, {key:'evidence', label:'Supporting evidence'}, {key:'outcome', label:'Outcomes'}, {key:'lessons', label:'Lessons learnt'}, {key:'implications', label:'Implications'}, {key:'recommendation', label:'Recommended actions'}, {key:'owner', label:'Responsible person'}, {key:'document', label:'Approved attachment link', type:'url'}]
@@ -41,12 +42,14 @@ export const modules: Record<string, Module> = {
 export function singaporeToday(now = new Date()) {
   return new Intl.DateTimeFormat('en-CA', {timeZone:'Asia/Singapore', year:'numeric', month:'2-digit', day:'2-digit'}).format(now);
 }
-export function addDays(date: string, days: number) {
+/** @param {string} date @param {number} days */
+export function addDays(date, days) {
   const value = new Date(date + 'T00:00:00Z');
   value.setUTCDate(value.getUTCDate() + days);
   return value.toISOString().slice(0, 10);
 }
-export function addMonths(date: string, months: number) {
+/** @param {string} date @param {number} months */
+export function addMonths(date, months) {
   const value = new Date(date + 'T00:00:00Z');
   const day = value.getUTCDate();
   value.setUTCDate(1);
@@ -55,16 +58,19 @@ export function addMonths(date: string, months: number) {
   value.setUTCDate(Math.min(day, lastDay));
   return value.toISOString().slice(0, 10);
 }
-export function fiscalYear(date: string, startMonth: number) {
+/** @param {string} date @param {number} startMonth */
+export function fiscalYear(date, startMonth) {
   return Number(date.slice(0, 4)) - Number(Number(date.slice(5, 7)) < startMonth);
 }
-export function dateWindow(tab: string, period: { start:string; end:string }) {
+/** @param {string} tab @param {{start:string, end:string}} period */
+export function dateWindow(tab, period) {
   const next = addDays(period.end, 1);
   if (tab === 'next-two-weeks') return { start: next, end: addDays(next, 13) };
   if (tab === 'next-three-months') return { start: next, end: addDays(addMonths(next, 3), -1) };
   return { start:period.start, end:period.end };
 }
-export function fortnight(date: string, anchor: string) {
+/** @param {string} date @param {string} anchor */
+export function fortnight(date, anchor) {
   const difference = (Date.parse(date) - Date.parse(anchor)) / 86400000;
   const start = addDays(anchor, Math.floor(difference / 14) * 14);
   return { start, end: addDays(start, 13) };

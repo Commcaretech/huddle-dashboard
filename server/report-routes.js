@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { actions, actionHistory, audit, entries, periods } from './db/schema.js';
 import { canManage, canWrite, centreScope } from './permissions.js';
 import { actionUpdate, conclusionInput, entryInput, selection, uid } from './validation-hub.js';
-import { actionStatuses, dateWindow, priorities, singaporeToday, tabs } from '../shared/reporting.ts';
+import { actionStatuses, dateWindow, priorities, singaporeToday, tabs } from '../shared/reporting.js';
 
 export class RequestError extends Error {
   constructor(status,message) { super(message); this.status = status; }

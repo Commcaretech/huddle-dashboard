@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Building2, CalendarDays, Database, Settings2 } from 'lucide-react';
-import { addDays, fortnight, periodKinds, singaporeToday } from '../shared/reporting';
+import { addDays, fortnight, periodKinds, singaporeToday } from '../shared/reporting.js';
 import { api, dateLabel, type Centre, type DataSource, type Workspace } from './api';
 import { Badge, Empty, Failure, Field, Loading, Modal, SaveForm, value } from './ui';
 

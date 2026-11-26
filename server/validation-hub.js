@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { modules, tabs, periodKinds, priorities, actionStatuses } from '../shared/reporting.ts';
+import { modules, tabs, periodKinds, priorities, actionStatuses } from '../shared/reporting.js';
 
 export const uid = z.uuid();
 export const short = z.string().trim().min(1).max(160);

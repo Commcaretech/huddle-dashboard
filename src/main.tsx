@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { QueryClient, QueryClientProvider, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Activity, ArrowLeft, ArrowRight, BarChart3, CalendarDays, ClipboardCheck, ClipboardList, Database, Dumbbell, GraduationCap, HeartPulse, LayoutDashboard, Menu, Moon, Package, Palette, PanelLeftClose, Presentation, Radio, Settings, Sun, Users, X } from 'lucide-react';
-import { fiscalYear, singaporeToday, tabs } from '../shared/reporting';
+import { fiscalYear, singaporeToday, tabs } from '../shared/reporting.js';
 import { api, dateLabel, type Workspace } from './api';
 import { Actions } from './Actions';
 import { Admin } from './Admin';

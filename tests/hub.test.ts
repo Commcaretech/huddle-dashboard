@@ -7,7 +7,7 @@ import { demoSubject,seedDemo } from '../server/db/seed.js';
 import { createApp } from '../server/app.js';
 import { canManage,canWrite,centreScope,loadActor } from '../server/permissions.js';
 import { normalisedMetric } from '../server/integrations/contracts.js';
-import { addDays,dateWindow,fiscalYear,fortnight,singaporeToday,tabs } from '../shared/reporting';
+import { addDays,dateWindow,fiscalYear,fortnight,singaporeToday,tabs } from '../shared/reporting.js';
 
 const origin='http://127.0.0.1:5173';
 let connection:Awaited<ReturnType<typeof connectDemo>>;
