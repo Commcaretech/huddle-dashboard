@@ -4,3 +4,9 @@ dist/
 data/
 *.log
 *.tsbuildinfo
+.env
+.env.*
+!.env.example
+test-results/
+playwright-report/
+.vercel/

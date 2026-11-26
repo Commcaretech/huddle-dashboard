@@ -1,35 +1,46 @@
-# Community Care Huddle Dashboard
+# Community Care Management Hub
 
-A localhost-only React + TypeScript dashboard with Vite, Tailwind CSS, Recharts, Express and SQLite.
+Internal management reporting across community care centres in Singapore. This release implements the foundation and manual reporting workflows specified for the first development pass.
 
-## Run
+## Run locally
 
-Install Node.js 22 LTS (with npm), then open a terminal in this folder:
+Install Node.js 24 LTS. In PowerShell, run:
 
-```sh
-npm install
-npm run dev
+```powershell
+npm.cmd ci
+npm.cmd run dev
 ```
 
-Open http://127.0.0.1:5173. Express listens on 127.0.0.1:3001. Both services bind only to loopback. No external APIs, fonts, analytics or cloud services are used. Installation requires internet access to fetch npm dependencies; use afterward is local.
+Open [http://127.0.0.1:5173](http://127.0.0.1:5173). Demo mode is loopback-only, uses an isolated local PostgreSQL-compatible PGlite database, and comes with labelled synthetic records. Production uses Neon PostgreSQL and Neon Auth.
 
-```sh
-npm run build
-npm test
+## What is available
+
+- Exactly 13 primary reporting routes, combined and individual centre views, financial year filtering, light and dark themes, and full-screen meeting presentation.
+- Managed centre, period, branding and user-access settings with backend permission checks.
+- Manual create, edit, archive and restore for practices and challenges, developments, training and logistics. Developments share one record across recent, upcoming and roadmap views.
+- Conclusions on each tab, with validated action fields, a global action tracker, status history and unresolved actions carried across reporting periods.
+- Read-only Data Sources registry, normalised metric contract and initial integration persistence. Analytical tabs surface unavailable states until approved data flows exist.
+
+## Repository layout
+
+| Path | Purpose |
+| --- | --- |
+| `src/` | React workspace, reporting forms, actions, administration and styles |
+| `shared/` | Tab and field definitions plus Singapore reporting date utilities |
+| `server/` | Express routes, authentication adapter, validation and permissions |
+| `server/db/` | Drizzle schema, runtime connections, migrations runner and explicit bootstrap |
+| `server/integrations/` | Source registry and versioned data contract |
+| `migrations/` | Versioned PostgreSQL DDL and Drizzle metadata |
+| `tests/` | Vitest API and database checks plus Playwright browser journeys |
+| `docs/` | Set-up, policy, integration and handover references |
+
+## Checks
+
+```powershell
+npm.cmd test
+npm.cmd run build
+npx.cmd playwright install chromium
+npm.cmd run test:e2e
 ```
 
-For a built application, run `npm run build` then `npm start` and open http://127.0.0.1:3001.
-
-## Data
-
-SQLite is stored in `data/huddle.sqlite` and created automatically. The application starts empty: all dashboard values come from uploaded Excel or CSV files. Generated demonstration records from earlier versions are removed automatically; user imports are preserved. Choose Data Management, download a template, upload your file, review the preview, and confirm the import.
-
-Download templates from Data Management. XLSX and CSV use their first worksheet. Headers must match the template exactly. Preview appears before import; errors prevent the whole import. Replace applies to all records of the selected data type, across all centres and years. Imported batches can be deleted, and individual records can be edited or deleted. Back up the data folder with the app stopped.
-
-KPI required fields: KPI Name, Target, Actual, Year, Month, Centre. Month is 1–12. Targets and actuals are non-negative. Zero targets have unavailable attainment. Traffic lights: green ≥100%, amber ≥90% and <100%, red <90%.
-
-Participant required fields: Participant ID, Age, Gender, Ethnicity, Language, Living Arrangement, CFS Category, Centre. Optional Year defaults to the current calendar year. Annual snapshots enable historical insights. Use Male/Female for the pyramid; language categories are English, Mandarin, Malay, Tamil, Others; living arrangement categories are Living Alone, Living With Spouse, Living With Family, Others. CFS accepts 1-3, 4-6, 7-9 (with an optional CFS prefix).
-
-Dashboard count KPIs sum monthly values; they are not unique people across months. Rate KPIs (names containing “rate” or “percent”) average reported observations. Overall attainment is an unweighted mean of nonzero-target KPI attainment. Comparisons apply the same centre/month filters to each year. Participant charts use the selected annual snapshot, independent of the month filter. Missing historical data produces no comparison rather than an invented trend. Age groups start at 50; younger records remain in totals.
-
-Excel export includes filtered KPI and participant source records. PDF exports the current report, including its charts, to paginated A4. Search in Data Management spans years, with the centre filter applied. Data is held on this computer; this app has no account system or encryption at rest, so use normal device access controls for participant data.
+See [Getting started](docs/GETTING_STARTED.md), [Neon setup](docs/NEON_SETUP.md), [Vercel deployment](docs/DEPLOYMENT.md), [User guide](docs/USER_GUIDE.md), [Handover](docs/HANDOVER.md) and [Development progress](docs/DEVELOPMENT_PROGRESS.md).
