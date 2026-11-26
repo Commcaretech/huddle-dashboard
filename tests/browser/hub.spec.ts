@@ -47,17 +47,25 @@ test('a fresh browser opens reports and workspace settings directly',async({page
 
 test('operator unlock enables source controls and shows attributed imported figures',async({page})=>{
   const operatorKey='b'.repeat(64);
-  const source={key:'activityhub',name:'ActivityHub',configured:true,status:'Ready for connection test',enabled:true,
-    datasets:['Programme series','Scheduled occurrences'],type:'Read-only API',aliases:[],history:[]};
+  const source={key:'glowbb',name:'GlowBBDashboard',configured:true,status:'Ready for connection test',enabled:true,
+    datasets:['Summary'],type:'Read-only API',aliases:[],history:[]};
   await page.route('**/api/admin/sources',async route=>{
     const authorised=route.request().headers()['x-integration-operator-key']===operatorKey;
     await route.fulfill({json:{authorised,sources:[source]}});
   });
   await page.route('**/api/integrations/report/kpi-performance?**',async route=>{
     expect(route.request().headers()['x-integration-operator-key']).toBe(operatorKey);
-    await route.fulfill({json:{window:{start:'2026-11-01',end:'2026-11-30'},source:'ActivityHub',
-      coverage:[],metrics:{Sessions:6,Cancelled:2},methodology:{Sessions:'Persisted dated occurrences',Cancelled:'Cancelled source status'},
-      programmes:[],sessions:[],truncated:false}});
+    await route.fulfill({json:{window:{start:'2026-11-01',end:'2026-11-30'},source:'GlowBBDashboard',centreName:'GLOW Bukit Batok',
+      syncedAt:'2026-11-26T02:00:00Z',partial:true,datasets:[{key:'summary',meta:{dataset:'summary',
+        period:{from:'2026-11-01',to:'2026-11-30'},metrics:{sessions:{value:6,unit:'sessions',status:'available'}}},
+        definitions:[{id:'sessions',displayName:'Recorded sessions',methodology:'Distinct delivered sessions'}],rows:[],truncated:false}]}});
+  });
+  await page.route('**/api/integrations/report/participant-profiles?**',async route=>{
+    const attendance={value:21,unit:'entries',status:'available'};
+    await route.fulfill({json:{window:{start:'2026-11-01',end:'2026-11-30'},source:'GlowBBDashboard',centreName:'GLOW Bukit Batok',partial:false,
+      syncedAt:'2026-11-26T02:00:00Z',datasets:[{key:'programmes',meta:{dataset:'programmes',period:{from:'2026-11-01',to:'2026-11-30'}},
+        definitions:[{id:'attendance',displayName:'Attendance entries',unit:'entries',methodology:'Observed entries'}],
+        rows:[{id:'synthetic-programme',name:'Synthetic programme',rank:1,metrics:{attendance}}],truncated:false}]}});
   });
   await page.goto('/');
   await page.getByRole('button',{name:'View data sources'}).click();
@@ -66,6 +74,13 @@ test('operator unlock enables source controls and shows attributed imported figu
   await page.getByRole('button',{name:'Unlock integrations'}).click();
   await expect(page.getByRole('button',{name:'Test connection'})).toBeVisible();
   await page.getByRole('link',{name:'KPI Performance'}).click();
-  await expect(page.getByRole('heading',{name:'ActivityHub reporting'})).toBeVisible();
-  await expect(page.getByRole('row').filter({hasText:'Persisted dated occurrences'}).getByRole('cell',{name:'6',exact:true})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'GlowBBDashboard reporting'})).toBeVisible();
+  await expect(page.getByRole('row').filter({hasText:'Distinct delivered sessions'}).getByRole('cell',{name:'6 sessions',exact:true})).toBeVisible();
+  await expect(page.getByText('HQ coverage: GLOW Bukit Batok only.')).toBeVisible();
+  await page.getByRole('link',{name:'Participant Profiles'}).click();
+  await expect(page.getByText('1. Synthetic programme')).toBeVisible();
+  await page.getByRole('button',{name:'Show chart'}).click();
+  await expect(page.getByRole('meter',{name:'Synthetic programme Attendance entries'})).toBeVisible();
+  await page.getByRole('button',{name:'Show table'}).click();
+  await expect(page.getByRole('cell',{name:'21 entries',exact:true})).toBeVisible();
 });

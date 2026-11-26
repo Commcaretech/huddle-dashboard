@@ -1,15 +1,9 @@
-# Integration status
+﻿# Integration status
 
-| Source | Implementation status |
+| Source | Status |
 | --- | --- |
-| ActivityHub | API v1 adapter and Neon snapshot workflow implemented. Connection test, discovery, exact mapping, preview, bounded sync, conditional requests, reconciliation, history and report sections verified with synthetic fixtures and local PostgreSQL-compatible tests. |
-| Attendance | Adapter registration and onboarding requirements. A verified aggregate endpoint and distinct-person methods are needed. |
-| Health | Adapter registration and onboarding requirements. An approved aggregate feed and reporting definitions are needed. |
-| Publicity | Adapter registration and onboarding requirements. An approved platform feed and metric definitions are needed. |
-| P3H | Adapter registration and onboarding requirements. An approved outgoing aggregate feed and deduplication rules are needed. |
-| Staff leave tracker | Adapter registration and onboarding requirements. A verified read-only availability feed is needed. |
-| CaritaHub, Excel and CSV | Listed for onboarding. Approved file schemas and amendment rules are needed. |
+| GlowBBDashboard | Active read-only adapter. Catalogue, exact-date snapshots, resumable historical jobs, centre mapping and reports are implemented. Hosted verification is pending. |
+| ActivityHub | Retired from active integration. Historical snapshots and job records remain in Neon. |
+| Other dashboards and file sources | Onboarding entries. Each requires an approved source contract before ingestion. |
 
-No hosted source was connected during development. Production needs the approved ActivityHub Edge Function deployment, credentials, Neon migration, role grants, exact mappings and a real connection test. Source availability and historical coverage should be verified in the actual environment.
-
-Current storage keeps the latest published version per centre and exact date scope, plus durable job history. It preserves the previous snapshot when a run fails. It does not implement signed-off historical report revisions, a scheduler, official KPI targets or an integration-specific identity provider. Existing manual reports, conclusions and actions are separate from imported data.
+See [GlowBBDashboard setup](GLOWBB_INTEGRATION.md), [data mapping](GLOWBB_DATA_MAPPING.md) and [sync instructions](GLOWBB_SYNC_GUIDE.md).

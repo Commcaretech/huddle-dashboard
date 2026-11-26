@@ -4,7 +4,7 @@ import { Activity, BarChart3, CalendarDays, ClipboardCheck, Layers3, Plus, Searc
 import { api, canWrite, dateLabel, params, type Centre, type Entry, type Period, type Report, type Workspace } from './api';
 import { addDays, dateWindow, modules, priorities, singaporeToday, type Tab } from '../shared/reporting.js';
 import { Badge, Empty, Failure, Field, Loading, Modal, PageControls, SaveForm, value } from './ui';
-import { IntegratedReport, activityHubTabs } from './IntegratedReport';
+import { IntegratedReport, glowReportTabs } from './IntegratedReport';
 import { useIntegrationAccess } from './integration-access';
 
 type Props = {tab:Tab; workspace:Workspace; centreId:string; period:Period; presenting:boolean; refresh:(message:string)=>void};
@@ -38,11 +38,11 @@ export function Reporting({tab,workspace,centreId,period,presenting,refresh}:Pro
     <div className="page-title"><div><div className="eyebrow">{tab.group}</div><h1>{tab.name}</h1><p>{tab.description}</p></div>
       <div className="date-tile"><CalendarDays size={20}/><div><span>{tab.id.startsWith('next-')?'Planning window':'Reporting window'}</span><strong>{dateLabel(window.start)} – {dateLabel(window.end)}</strong></div></div>
     </div>
-    {tab.indicators.length>0 && <section className="indicator-grid" aria-label="Indicators">{tab.indicators.map((indicator,index)=>{
+    {tab.indicators.length>0 && !(integration.key&&glowReportTabs.includes(tab.id)) && <section className="indicator-grid" aria-label="Indicators">{tab.indicators.map((indicator,index)=>{
       const Icon=indicatorIcons[index];
       return <div className="indicator panel" key={indicator}><span className="indicator-icon"><Icon size={19}/></span><h2>{indicator}</h2><strong className="indicator-value" aria-label="Unavailable">—</strong><span className="muted">Unavailable</span></div>;
     })}</section>}
-    <IntegratedReport tab={tab.id} periodId={period.id} centreId={centreId} centres={workspace.centres}/>
+    <IntegratedReport tab={tab.id} periodId={period.id} centreId={centreId}/>
     {report.isPending ? <Loading/> : report.isError ? <Failure error={report.error}/> : <>
       {kind ? <section className="panel report-panel">
         <div className="panel-heading"><div><h2>{kind==='development' ? 'Developments' : kind==='logistics' ? 'Procurement requests' : kind==='training' ? 'Training records' : 'Practices and challenges'}</h2><p>{presenting?'':tab.id==='next-two-weeks'?'Routine programme sessions appear when flagged as management highlights.':'Browse records for the selected centres and dates.'}</p></div>
@@ -62,7 +62,7 @@ export function Reporting({tab,workspace,centreId,period,presenting,refresh}:Pro
             const through = Math.min(length,(Date.parse(row.dueDate||row.date)-Date.parse(window.start))/86400000+1);
             return <div key={row.id}><EntryCard row={row} centres={workspace.centres} editable={editable} edit={setEdit} archive={setArchive}/><div className="roadmap-track" aria-label={'Scheduled '+dateLabel(row.date)+' through '+dateLabel(row.dueDate||row.date)}><span style={{marginInlineStart:from/length*100+'%',width:Math.max(1,through-from)/length*100+'%'}}/></div></div>;
           })}</div>:<div className="entry-list">{visible.map(row=><EntryCard key={row.id} row={row} centres={workspace.centres} editable={editable} edit={setEdit} archive={setArchive}/>)}</div>}
-      </section> : integration.key&&activityHubTabs.includes(tab.id)?null:<section className="panel report-panel"><div className="panel-heading"><div><h2>Reporting data</h2><p>Figures will appear once an approved reporting dataset is connected.</p></div><Badge>Source pending</Badge></div>
+      </section> : integration.key&&glowReportTabs.includes(tab.id)?null:<section className="panel report-panel"><div className="panel-heading"><div><h2>Reporting data</h2><p>Figures will appear once an approved reporting dataset is connected.</p></div><Badge>Source pending</Badge></div>
         <Empty title="No reporting data available">Use the reporting conclusion below to record verified observations for this meeting.</Empty>
       </section>}
       <section className="panel report-panel">

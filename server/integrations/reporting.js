@@ -1,76 +1,66 @@
-import { and,desc,eq,gte,inArray,lte,ne } from 'drizzle-orm';
-import { aliases, integrationFlags, integrationSnapshots, periods, syncJobs } from '../db/schema.js';
-import { addDays,dateWindow,singaporeToday } from '../../shared/reporting.js';
+import { and,desc,eq } from 'drizzle-orm';
+import { aliases,integrationSnapshots,periods,syncJobs } from '../db/schema.js';
+import { singaporeToday } from '../../shared/reporting.js';
 import { RequestError } from '../report-routes.js';
 import { getSource } from './sync.js';
+import { glowCentre,glowSource,glowTabs } from './glowbb-metrics.js';
 
-export const connectedTabs=['kpi-performance','participant-profiles','fitness','hart','next-two-weeks','next-three-months'];
-export const methodology={
-  Programmes:'Distinct source programme IDs among matching dated sessions, including IDs with cancelled sessions.',
-  Sessions:'Eligible persisted dated occurrences. Recorded source statuses are preserved.',
-  Scheduled:'Occurrences with the recorded scheduled status.',
-  Tentative:'Occurrences with the recorded TBC status.',
-  Cancelled:'Occurrences with the recorded cancelled status.',
-  'Reported completed':'Occurrences explicitly marked completed in ActivityHub. ActivityHub has no completion workflow.',
-  'Planned pax':'Sum of recorded planned pax over non-cancelled sessions. Coverage is shown separately.'
-};
-export function calculateMetrics(rows) {
-  const pax=rows.filter(row=>row.status!=='cancelled'&&row.plannedPax!==null);
-  return { Programmes:new Set(rows.map(row=>row.programmeId)).size,Sessions:rows.length,
-    Scheduled:rows.filter(row=>row.status==='scheduled').length,Tentative:rows.filter(row=>row.status==='tbc').length,
-    Cancelled:rows.filter(row=>row.status==='cancelled').length,
-    'Reported completed':rows.some(row=>row.status==='completed')?rows.filter(row=>row.status==='completed').length:null,
-    'Planned pax':pax.length?pax.reduce((sum,row)=>sum+row.plannedPax,0):null,paxSessions:pax.length };
+export function isGlowHubCentre(centre) {
+  return centre?.active && ['GLOW_BB','GLOW_BUKIT_BATOK'].includes(centre.code.toUpperCase());
 }
-export async function integratedReport(db,actor,{tab,periodId,centreId}) {
-  if (!connectedTabs.includes(tab)) throw new RequestError(404,'Reporting dataset not found.');
+
+function reportRows(rows){
+  return rows.slice(0,150).map(row=>row.programme&&row.monthly ? {...row,
+    monthly:row.monthly.slice(-12).map(month=>({month:month.month,metrics:{attendance:month.metrics.attendance,unique:month.metrics.unique}}))
+  }:row);
+}
+
+const forTab={
+  'kpi-performance':['summary','summary:year-ago','summary:ytd','summary:ytd-ago','kpis','trends:month','trends:quarter','trends:year','health-assessments'],
+  'participant-profiles':['membership','attendance','demographics','programmes','trends:month','trends:quarter','trends:year'],
+  'health-data':['health-assessments'],
+  fitness:['fitness','fitness:gym-tonic'],
+  hart:['hart']
+};
+
+export async function integratedReport(db,actor,{tab,periodId,centreId,approvedHart=new Set()}) {
+  if (!glowTabs.includes(tab)) throw new RequestError(404,'Reporting dataset not found.');
   const [period]=await db.select().from(periods).where(and(eq(periods.orgId,actor.orgId),eq(periods.id,periodId)));
   if (!period) throw new RequestError(404,'Reporting period not found.');
-  const window=dateWindow(tab,period);
-  const source=await getSource(db,actor,'activityhub');
-  const result={window,source:'ActivityHub',methodology,coverage:[],metrics:null,programmes:[],sessions:[],truncated:false};
-  if (!source) return result;
-  const centreIds=new Set(actor.centres.filter(centre=>centre.active&&(!centreId||centre.id===centreId)).map(centre=>centre.id));
-  if (!centreIds.size) return result;
-  const [rows,flags,[recentAttempt]]=await Promise.all([
-    db.selectDistinctOn([integrationSnapshots.centreId],{snapshot:integrationSnapshots}).from(integrationSnapshots)
-      .innerJoin(aliases,and(eq(aliases.sourceId,integrationSnapshots.sourceId),
-        eq(aliases.orgId,integrationSnapshots.orgId),eq(aliases.alias,integrationSnapshots.externalCentre),
-        eq(aliases.centreId,integrationSnapshots.centreId)))
-      .where(and(eq(integrationSnapshots.orgId,actor.orgId),eq(integrationSnapshots.sourceId,source.id),
-        inArray(integrationSnapshots.centreId,[...centreIds]),lte(integrationSnapshots.fromDate,window.start),
-        gte(integrationSnapshots.toDate,addDays(window.end,1))))
-      .orderBy(integrationSnapshots.centreId,desc(integrationSnapshots.refreshedAt),integrationSnapshots.id),
-    db.select().from(integrationFlags).where(eq(integrationFlags.sourceId,source.id)),
-    db.select().from(syncJobs).where(and(eq(syncJobs.sourceId,source.id),ne(syncJobs.status,'running'))).orderBy(desc(syncJobs.createdAt)).limit(1)
-  ]);
-  const selected=rows.map(row=>row.snapshot);
-  const flagsById=new Map(flags.map(flag=>[flag.externalCentre+':'+flag.externalId,flag]));
-  const missingHartApproval=tab==='hart'&&selected.length>0&&
-    !flags.some(flag=>flag.hart&&selected.some(snapshot=>snapshot.externalCentre===flag.externalCentre));
-  const upcoming=tab.startsWith('next-');
-  const now=new Date();
-  const today=singaporeToday(now);
-  const clock=now.toLocaleTimeString('en-GB',{timeZone:'Asia/Singapore',hour:'2-digit',minute:'2-digit',hourCycle:'h23'});
-  const sessions=selected.flatMap(snapshot=>(snapshot.data[upcoming?'upcoming':'sessions']?.rows??[]).filter(row=>{
-    if (row.sessionDate<window.start||row.sessionDate>window.end) return false;
-    const flag=flagsById.get(row.centreId+':'+row.programmeId);
-    if (tab==='fitness'&&!row.fitnessRelated) return false;
-    if (tab==='hart'&&!flag?.hart) return false;
-    if (tab==='next-two-weeks'&&!flag?.highlight) return false;
-    if (upcoming&&(row.sessionDate<today||(row.sessionDate===today&&(!row.startTime||row.startTime.padStart(5,'0')<=clock)))) return false;
-    return true;
-  }).map(row=>({...row,hubCentreId:snapshot.centreId})));
-  const ids=new Set(sessions.map(row=>row.programmeId));
-  const programmes=selected.flatMap(snapshot=>snapshot.data.programmes?.rows??[]).filter(row=>ids.has(row.id)).map(row=>({
-    ...row,...flagsById.get(row.centreId+':'+row.id)
-  }));
-  return {...result,disabled:!source.enabled,partial:selected.length<centreIds.size,
-    coverage:selected.map(row=>({centreId:row.centreId,syncedAt:row.refreshedAt,
-      stale:!source.enabled||+now-+row.refreshedAt>86400000||
-        (recentAttempt?.status==='failed'&&recentAttempt.createdAt>row.refreshedAt)})),
-    metrics:selected.length&&!missingHartApproval?calculateMetrics(sessions):null,
-    unavailableReason:missingHartApproval?'No approved H.ART programme mapping for the covered centres.':null,programmes:programmes.slice(0,100),
-    sessions:sessions.sort((a,b)=>a.sessionDate.localeCompare(b.sessionDate)||String(a.startTime).localeCompare(String(b.startTime))).slice(0,100),
-    truncated:programmes.length>100||sessions.length>100 };
+  const today=singaporeToday();
+  const window={start:period.start,end:period.end>today?today:period.end};
+  const base={source:'GlowBBDashboard',centreName:'GLOW Bukit Batok',window,partial:!centreId,datasets:[]};
+  const unavailable=reason=>({...base,reason});
+  if(window.end<window.start) return unavailable('The selected reporting period has not started.');
+  const source=await getSource(db,actor,glowSource);
+  if (!source) return unavailable('GlowBBDashboard has not been configured.');
+  const [mapping]=await db.select().from(aliases).where(and(eq(aliases.orgId,actor.orgId),eq(aliases.sourceId,source.id),eq(aliases.alias,glowCentre)));
+  const mapped=actor.centres.find(centre=>centre.id===mapping?.centreId&&isGlowHubCentre(centre));
+  if(!mapped || (centreId&&mapped.id!==centreId)) return unavailable('GlowBBDashboard data is available only for its mapped GLOW Bukit Batok centre.');
+  const [snapshot]=await db.select().from(integrationSnapshots).where(and(
+    eq(integrationSnapshots.orgId,actor.orgId),eq(integrationSnapshots.sourceId,source.id),eq(integrationSnapshots.externalCentre,glowCentre),
+    eq(integrationSnapshots.centreId,mapped.id),eq(integrationSnapshots.fromDate,window.start),eq(integrationSnapshots.toDate,window.end)
+  ));
+  if(!snapshot) return unavailable('No published snapshot matches these exact dates. Sync this range in Data sources.');
+  const [attempt]=await db.select({status:syncJobs.status,createdAt:syncJobs.createdAt}).from(syncJobs)
+    .where(eq(syncJobs.sourceId,source.id)).orderBy(desc(syncJobs.createdAt)).limit(1);
+  const datasets=forTab[tab].flatMap(key=>{
+    const [meta,...rows]=snapshot.data[key]?.rows??[];
+    if(!meta) return [];
+    return [{key,meta,rows:reportRows(rows),truncated:rows.length>150,definitions:meta.definitions??[]}];
+  });
+  if(tab==='hart'&&approvedHart.size){
+    const [meta,...rows]=snapshot.data.programmes?.rows??[];
+    if(meta){
+      const approvedRows=rows.filter(row=>approvedHart.has(row.programme));
+      if(approvedRows.length) {
+        const {metrics,previous,...programmeMeta}=meta;
+        datasets.push({key:'hart:approved-programmes',meta:programmeMeta,rows:reportRows(approvedRows),
+          truncated:approvedRows.length>150,definitions:meta.definitions??[]});
+      }
+    }
+  }
+  return {...base,datasets,syncedAt:snapshot.refreshedAt,disabled:!source.enabled,
+    stale:!source.enabled||Date.now()-+snapshot.refreshedAt>86400000||(attempt?.status==='failed'&&attempt.createdAt>snapshot.refreshedAt),
+    reason:datasets.length?null:'The source did not advertise a dataset for this reporting tab.'};
 }

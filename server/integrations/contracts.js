@@ -1,8 +1,7 @@
 import { z } from 'zod';
 
-export const sourceKeys = ['activityhub', 'attendance', 'caritahub', 'health', 'p3h', 'publicity', 'manpower', 'excel', 'csv'];
 export const sourceRegistry = [
-  { key:'activityhub', name:'ActivityHub', datasets:['Programme series', 'Scheduled occurrences'], type:'Read-only API' },
+  { key:'glowbb', name:'GlowBBDashboard', centre:'GLOW Bukit Batok', datasets:['Discover from source'], type:'Read-only API' },
   { key:'attendance', name:'Attendance dashboards', datasets:['Attendance entries', 'Aggregate participation'], type:'API or view' },
   { key:'caritahub', name:'CaritaHub', datasets:['Approved aggregate exports'], type:'File' },
   { key:'health', name:'Health assessment dashboard', datasets:['Assessment counts', 'Aggregate coverage'], type:'API or view' },

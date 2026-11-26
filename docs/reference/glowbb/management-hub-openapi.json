@@ -1,0 +1,2346 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "GlowBBDashboard Management Hub Reporting API",
+    "version": "1.0.0",
+    "description": "Read-only centre reporting. See MANAGEMENT_HUB_API.md for deployment and MANAGEMENT_HUB_DATASETS.md for definitions."
+  },
+  "servers": [
+    {
+      "url": "https://glowbbdashboard.vercel.app/api/reporting/v1"
+    }
+  ],
+  "security": [
+    {
+      "ReportingBearer": []
+    }
+  ],
+  "paths": {
+    "/health": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/centre"
+        }
+      ],
+      "get": {
+        "operationId": "getReportingHealth",
+        "summary": "Health",
+        "responses": {
+          "200": {
+            "description": "Centre-scoped response. Data fields may be absent if the workspace is missing.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/Envelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "workspaceAvailable": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "405": {
+            "$ref": "#/components/responses/Error405"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        }
+      },
+      "head": {
+        "summary": "Reporting response headers",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/HeadSuccess"
+          },
+          "400": {
+            "$ref": "#/components/responses/Head400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Head401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Head403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Head404"
+          },
+          "405": {
+            "$ref": "#/components/responses/Head405"
+          },
+          "429": {
+            "$ref": "#/components/responses/Head429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Head500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Head503"
+          }
+        }
+      }
+    },
+    "/datasets": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/centre"
+        }
+      ],
+      "get": {
+        "operationId": "getReportingDatasets",
+        "summary": "Datasets",
+        "responses": {
+          "200": {
+            "description": "Centre-scoped response. Data fields may be absent if the workspace is missing.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/Envelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "datasets": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/Dataset"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "405": {
+            "$ref": "#/components/responses/Error405"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        }
+      },
+      "head": {
+        "summary": "Reporting response headers",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/HeadSuccess"
+          },
+          "400": {
+            "$ref": "#/components/responses/Head400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Head401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Head403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Head404"
+          },
+          "405": {
+            "$ref": "#/components/responses/Head405"
+          },
+          "429": {
+            "$ref": "#/components/responses/Head429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Head500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Head503"
+          }
+        }
+      }
+    },
+    "/summary": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/centre"
+        },
+        {
+          "$ref": "#/components/parameters/from"
+        },
+        {
+          "$ref": "#/components/parameters/to"
+        },
+        {
+          "$ref": "#/components/parameters/year"
+        },
+        {
+          "$ref": "#/components/parameters/month"
+        },
+        {
+          "$ref": "#/components/parameters/quarter"
+        },
+        {
+          "$ref": "#/components/parameters/programme"
+        },
+        {
+          "$ref": "#/components/parameters/domain"
+        },
+        {
+          "$ref": "#/components/parameters/subdomain"
+        }
+      ],
+      "get": {
+        "operationId": "getReportingSummary",
+        "summary": "Summary",
+        "responses": {
+          "200": {
+            "description": "Centre-scoped response. Data fields may be absent if the workspace is missing.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/Envelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "metrics": {
+                          "type": "object",
+                          "additionalProperties": {
+                            "$ref": "#/components/schemas/Metric"
+                          }
+                        },
+                        "previous": {
+                          "$ref": "#/components/schemas/Comparison"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "405": {
+            "$ref": "#/components/responses/Error405"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        }
+      },
+      "head": {
+        "summary": "Reporting response headers",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/HeadSuccess"
+          },
+          "400": {
+            "$ref": "#/components/responses/Head400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Head401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Head403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Head404"
+          },
+          "405": {
+            "$ref": "#/components/responses/Head405"
+          },
+          "429": {
+            "$ref": "#/components/responses/Head429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Head500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Head503"
+          }
+        }
+      }
+    },
+    "/attendance": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/centre"
+        },
+        {
+          "$ref": "#/components/parameters/from"
+        },
+        {
+          "$ref": "#/components/parameters/to"
+        },
+        {
+          "$ref": "#/components/parameters/year"
+        },
+        {
+          "$ref": "#/components/parameters/month"
+        },
+        {
+          "$ref": "#/components/parameters/quarter"
+        },
+        {
+          "$ref": "#/components/parameters/programme"
+        },
+        {
+          "$ref": "#/components/parameters/domain"
+        },
+        {
+          "$ref": "#/components/parameters/subdomain"
+        }
+      ],
+      "get": {
+        "operationId": "getReportingAttendance",
+        "summary": "Attendance",
+        "responses": {
+          "200": {
+            "description": "Centre-scoped response. Data fields may be absent if the workspace is missing.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/Envelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "metrics": {
+                          "type": "object",
+                          "additionalProperties": {
+                            "$ref": "#/components/schemas/Metric"
+                          }
+                        },
+                        "previous": {
+                          "$ref": "#/components/schemas/Comparison"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "405": {
+            "$ref": "#/components/responses/Error405"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        }
+      },
+      "head": {
+        "summary": "Reporting response headers",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/HeadSuccess"
+          },
+          "400": {
+            "$ref": "#/components/responses/Head400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Head401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Head403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Head404"
+          },
+          "405": {
+            "$ref": "#/components/responses/Head405"
+          },
+          "429": {
+            "$ref": "#/components/responses/Head429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Head500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Head503"
+          }
+        }
+      }
+    },
+    "/trends": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/centre"
+        },
+        {
+          "$ref": "#/components/parameters/from"
+        },
+        {
+          "$ref": "#/components/parameters/to"
+        },
+        {
+          "$ref": "#/components/parameters/year"
+        },
+        {
+          "$ref": "#/components/parameters/month"
+        },
+        {
+          "$ref": "#/components/parameters/quarter"
+        },
+        {
+          "$ref": "#/components/parameters/programme"
+        },
+        {
+          "$ref": "#/components/parameters/domain"
+        },
+        {
+          "$ref": "#/components/parameters/subdomain"
+        },
+        {
+          "$ref": "#/components/parameters/grain"
+        }
+      ],
+      "get": {
+        "operationId": "getReportingTrends",
+        "summary": "Trends",
+        "responses": {
+          "200": {
+            "description": "Centre-scoped response. Data fields may be absent if the workspace is missing.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/Envelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "metrics": {
+                          "type": "object",
+                          "additionalProperties": {
+                            "$ref": "#/components/schemas/Metric"
+                          }
+                        },
+                        "previous": {
+                          "$ref": "#/components/schemas/Comparison"
+                        },
+                        "rows": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "period": {
+                                "type": "string"
+                              },
+                              "from": {
+                                "type": "string",
+                                "format": "date"
+                              },
+                              "to": {
+                                "type": "string",
+                                "format": "date"
+                              },
+                              "partial": {
+                                "type": "boolean"
+                              },
+                              "metrics": {
+                                "type": "object",
+                                "additionalProperties": {
+                                  "$ref": "#/components/schemas/Metric"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "405": {
+            "$ref": "#/components/responses/Error405"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        }
+      },
+      "head": {
+        "summary": "Reporting response headers",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/HeadSuccess"
+          },
+          "400": {
+            "$ref": "#/components/responses/Head400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Head401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Head403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Head404"
+          },
+          "405": {
+            "$ref": "#/components/responses/Head405"
+          },
+          "429": {
+            "$ref": "#/components/responses/Head429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Head500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Head503"
+          }
+        }
+      }
+    },
+    "/programmes": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/centre"
+        },
+        {
+          "$ref": "#/components/parameters/from"
+        },
+        {
+          "$ref": "#/components/parameters/to"
+        },
+        {
+          "$ref": "#/components/parameters/year"
+        },
+        {
+          "$ref": "#/components/parameters/month"
+        },
+        {
+          "$ref": "#/components/parameters/quarter"
+        },
+        {
+          "$ref": "#/components/parameters/programme"
+        },
+        {
+          "$ref": "#/components/parameters/domain"
+        },
+        {
+          "$ref": "#/components/parameters/subdomain"
+        },
+        {
+          "$ref": "#/components/parameters/page"
+        },
+        {
+          "$ref": "#/components/parameters/limit"
+        }
+      ],
+      "get": {
+        "operationId": "getReportingProgrammes",
+        "summary": "Programmes",
+        "responses": {
+          "200": {
+            "description": "Centre-scoped response. Data fields may be absent if the workspace is missing.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/Envelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "metrics": {
+                          "type": "object",
+                          "additionalProperties": {
+                            "$ref": "#/components/schemas/Metric"
+                          }
+                        },
+                        "previous": {
+                          "$ref": "#/components/schemas/Comparison"
+                        },
+                        "classification": {
+                          "type": "string"
+                        },
+                        "rows": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "programme": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "rank": {
+                                "type": "integer",
+                                "minimum": 0
+                              },
+                              "primaryDomain": {
+                                "type": "string"
+                              },
+                              "domains": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              },
+                              "subdomains": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              },
+                              "metrics": {
+                                "type": "object",
+                                "additionalProperties": {
+                                  "$ref": "#/components/schemas/Metric"
+                                }
+                              },
+                              "previous": {
+                                "type": "object",
+                                "additionalProperties": {
+                                  "$ref": "#/components/schemas/Metric"
+                                },
+                                "nullable": true
+                              },
+                              "monthly": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "month": {
+                                      "type": "string"
+                                    },
+                                    "metrics": {
+                                      "type": "object",
+                                      "additionalProperties": {
+                                        "$ref": "#/components/schemas/Metric"
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "pagination": {
+                          "type": "object",
+                          "properties": {
+                            "page": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "limit": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "total": {
+                              "type": "integer",
+                              "minimum": 0
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "405": {
+            "$ref": "#/components/responses/Error405"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        }
+      },
+      "head": {
+        "summary": "Reporting response headers",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/HeadSuccess"
+          },
+          "400": {
+            "$ref": "#/components/responses/Head400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Head401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Head403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Head404"
+          },
+          "405": {
+            "$ref": "#/components/responses/Head405"
+          },
+          "429": {
+            "$ref": "#/components/responses/Head429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Head500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Head503"
+          }
+        }
+      }
+    },
+    "/demographics": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/centre"
+        },
+        {
+          "$ref": "#/components/parameters/from"
+        },
+        {
+          "$ref": "#/components/parameters/to"
+        },
+        {
+          "$ref": "#/components/parameters/year"
+        },
+        {
+          "$ref": "#/components/parameters/month"
+        },
+        {
+          "$ref": "#/components/parameters/quarter"
+        },
+        {
+          "$ref": "#/components/parameters/programme"
+        },
+        {
+          "$ref": "#/components/parameters/domain"
+        },
+        {
+          "$ref": "#/components/parameters/subdomain"
+        }
+      ],
+      "get": {
+        "operationId": "getReportingDemographics",
+        "summary": "Demographics",
+        "responses": {
+          "200": {
+            "description": "Centre-scoped response. Data fields may be absent if the workspace is missing.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/Envelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "metrics": {
+                          "type": "object",
+                          "additionalProperties": {
+                            "$ref": "#/components/schemas/Metric"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "405": {
+            "$ref": "#/components/responses/Error405"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        }
+      },
+      "head": {
+        "summary": "Reporting response headers",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/HeadSuccess"
+          },
+          "400": {
+            "$ref": "#/components/responses/Head400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Head401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Head403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Head404"
+          },
+          "405": {
+            "$ref": "#/components/responses/Head405"
+          },
+          "429": {
+            "$ref": "#/components/responses/Head429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Head500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Head503"
+          }
+        }
+      }
+    },
+    "/membership": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/centre"
+        },
+        {
+          "$ref": "#/components/parameters/from"
+        },
+        {
+          "$ref": "#/components/parameters/to"
+        },
+        {
+          "$ref": "#/components/parameters/year"
+        },
+        {
+          "$ref": "#/components/parameters/month"
+        },
+        {
+          "$ref": "#/components/parameters/quarter"
+        }
+      ],
+      "get": {
+        "operationId": "getReportingMembership",
+        "summary": "Membership",
+        "responses": {
+          "200": {
+            "description": "Centre-scoped response. Data fields may be absent if the workspace is missing.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/Envelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "metrics": {
+                          "type": "object",
+                          "additionalProperties": {
+                            "$ref": "#/components/schemas/Metric"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "405": {
+            "$ref": "#/components/responses/Error405"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        }
+      },
+      "head": {
+        "summary": "Reporting response headers",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/HeadSuccess"
+          },
+          "400": {
+            "$ref": "#/components/responses/Head400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Head401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Head403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Head404"
+          },
+          "405": {
+            "$ref": "#/components/responses/Head405"
+          },
+          "429": {
+            "$ref": "#/components/responses/Head429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Head500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Head503"
+          }
+        }
+      }
+    },
+    "/health-assessments": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/centre"
+        },
+        {
+          "$ref": "#/components/parameters/from"
+        },
+        {
+          "$ref": "#/components/parameters/to"
+        },
+        {
+          "$ref": "#/components/parameters/year"
+        },
+        {
+          "$ref": "#/components/parameters/month"
+        },
+        {
+          "$ref": "#/components/parameters/quarter"
+        },
+        {
+          "$ref": "#/components/parameters/assessmentType"
+        }
+      ],
+      "get": {
+        "operationId": "getReportingHealthAssessments",
+        "summary": "Health-assessments",
+        "responses": {
+          "200": {
+            "description": "Centre-scoped response. Data fields may be absent if the workspace is missing.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/Envelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "assessments": {
+                          "type": "object",
+                          "properties": {
+                            "SPPB": {
+                              "type": "object",
+                              "properties": {
+                                "metrics": {
+                                  "type": "object",
+                                  "additionalProperties": {
+                                    "$ref": "#/components/schemas/Metric"
+                                  }
+                                },
+                                "monthly": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "object",
+                                    "properties": {
+                                      "month": {
+                                        "type": "string"
+                                      },
+                                      "reportedTotal": {
+                                        "$ref": "#/components/schemas/Metric"
+                                      },
+                                      "final": {
+                                        "type": "boolean",
+                                        "nullable": true
+                                      }
+                                    }
+                                  }
+                                },
+                                "reportedMonths": {
+                                  "type": "integer",
+                                  "minimum": 0
+                                },
+                                "selectedMonths": {
+                                  "type": "integer",
+                                  "minimum": 0
+                                },
+                                "linked": {
+                                  "type": "object",
+                                  "additionalProperties": {
+                                    "$ref": "#/components/schemas/Metric"
+                                  }
+                                },
+                                "linkedMonthly": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "object",
+                                    "properties": {
+                                      "month": {
+                                        "type": "string"
+                                      },
+                                      "records": {
+                                        "type": "integer",
+                                        "minimum": 0
+                                      }
+                                    }
+                                  },
+                                  "nullable": true
+                                }
+                              }
+                            },
+                            "TANITA": {
+                              "type": "object",
+                              "properties": {
+                                "metrics": {
+                                  "type": "object",
+                                  "additionalProperties": {
+                                    "$ref": "#/components/schemas/Metric"
+                                  }
+                                },
+                                "monthly": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "object",
+                                    "properties": {
+                                      "month": {
+                                        "type": "string"
+                                      },
+                                      "reportedTotal": {
+                                        "$ref": "#/components/schemas/Metric"
+                                      },
+                                      "final": {
+                                        "type": "boolean",
+                                        "nullable": true
+                                      }
+                                    }
+                                  }
+                                },
+                                "reportedMonths": {
+                                  "type": "integer",
+                                  "minimum": 0
+                                },
+                                "selectedMonths": {
+                                  "type": "integer",
+                                  "minimum": 0
+                                },
+                                "linked": {
+                                  "type": "object",
+                                  "additionalProperties": {
+                                    "$ref": "#/components/schemas/Metric"
+                                  }
+                                },
+                                "linkedMonthly": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "object",
+                                    "properties": {
+                                      "month": {
+                                        "type": "string"
+                                      },
+                                      "records": {
+                                        "type": "integer",
+                                        "minimum": 0
+                                      }
+                                    }
+                                  },
+                                  "nullable": true
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "405": {
+            "$ref": "#/components/responses/Error405"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        }
+      },
+      "head": {
+        "summary": "Reporting response headers",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/HeadSuccess"
+          },
+          "400": {
+            "$ref": "#/components/responses/Head400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Head401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Head403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Head404"
+          },
+          "405": {
+            "$ref": "#/components/responses/Head405"
+          },
+          "429": {
+            "$ref": "#/components/responses/Head429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Head500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Head503"
+          }
+        }
+      }
+    },
+    "/kpis": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/centre"
+        },
+        {
+          "$ref": "#/components/parameters/from"
+        },
+        {
+          "$ref": "#/components/parameters/to"
+        },
+        {
+          "$ref": "#/components/parameters/year"
+        },
+        {
+          "$ref": "#/components/parameters/month"
+        },
+        {
+          "$ref": "#/components/parameters/quarter"
+        }
+      ],
+      "get": {
+        "operationId": "getReportingKPIs",
+        "summary": "KPIs",
+        "responses": {
+          "200": {
+            "description": "Centre-scoped response. Data fields may be absent if the workspace is missing.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/Envelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "rows": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "metric": {
+                                "type": "string"
+                              },
+                              "source": {
+                                "enum": [
+                                  "dashboard",
+                                  "operations"
+                                ]
+                              },
+                              "from": {
+                                "type": "string",
+                                "format": "date"
+                              },
+                              "to": {
+                                "type": "string",
+                                "format": "date"
+                              },
+                              "programme": {
+                                "type": "string",
+                                "nullable": true
+                              },
+                              "metrics": {
+                                "type": "object",
+                                "additionalProperties": {
+                                  "$ref": "#/components/schemas/Metric"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "405": {
+            "$ref": "#/components/responses/Error405"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        }
+      },
+      "head": {
+        "summary": "Reporting response headers",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/HeadSuccess"
+          },
+          "400": {
+            "$ref": "#/components/responses/Head400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Head401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Head403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Head404"
+          },
+          "405": {
+            "$ref": "#/components/responses/Head405"
+          },
+          "429": {
+            "$ref": "#/components/responses/Head429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Head500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Head503"
+          }
+        }
+      }
+    },
+    "/fitness": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/centre"
+        },
+        {
+          "$ref": "#/components/parameters/from"
+        },
+        {
+          "$ref": "#/components/parameters/to"
+        },
+        {
+          "$ref": "#/components/parameters/year"
+        },
+        {
+          "$ref": "#/components/parameters/month"
+        },
+        {
+          "$ref": "#/components/parameters/quarter"
+        },
+        {
+          "$ref": "#/components/parameters/programme"
+        },
+        {
+          "$ref": "#/components/parameters/domain"
+        },
+        {
+          "$ref": "#/components/parameters/subdomain"
+        },
+        {
+          "$ref": "#/components/parameters/page"
+        },
+        {
+          "$ref": "#/components/parameters/limit"
+        }
+      ],
+      "get": {
+        "operationId": "getReportingFitness",
+        "summary": "Fitness",
+        "responses": {
+          "200": {
+            "description": "Centre-scoped response. Data fields may be absent if the workspace is missing.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/Envelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "metrics": {
+                          "type": "object",
+                          "additionalProperties": {
+                            "$ref": "#/components/schemas/Metric"
+                          }
+                        },
+                        "previous": {
+                          "$ref": "#/components/schemas/Comparison"
+                        },
+                        "classification": {
+                          "type": "string"
+                        },
+                        "rows": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "programme": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "rank": {
+                                "type": "integer",
+                                "minimum": 0
+                              },
+                              "primaryDomain": {
+                                "type": "string"
+                              },
+                              "domains": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              },
+                              "subdomains": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              },
+                              "metrics": {
+                                "type": "object",
+                                "additionalProperties": {
+                                  "$ref": "#/components/schemas/Metric"
+                                }
+                              },
+                              "previous": {
+                                "type": "object",
+                                "additionalProperties": {
+                                  "$ref": "#/components/schemas/Metric"
+                                },
+                                "nullable": true
+                              },
+                              "monthly": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "month": {
+                                      "type": "string"
+                                    },
+                                    "metrics": {
+                                      "type": "object",
+                                      "additionalProperties": {
+                                        "$ref": "#/components/schemas/Metric"
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "pagination": {
+                          "type": "object",
+                          "properties": {
+                            "page": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "limit": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "total": {
+                              "type": "integer",
+                              "minimum": 0
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "405": {
+            "$ref": "#/components/responses/Error405"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        }
+      },
+      "head": {
+        "summary": "Reporting response headers",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/HeadSuccess"
+          },
+          "400": {
+            "$ref": "#/components/responses/Head400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Head401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Head403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Head404"
+          },
+          "405": {
+            "$ref": "#/components/responses/Head405"
+          },
+          "429": {
+            "$ref": "#/components/responses/Head429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Head500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Head503"
+          }
+        }
+      }
+    },
+    "/hart": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/centre"
+        },
+        {
+          "$ref": "#/components/parameters/from"
+        },
+        {
+          "$ref": "#/components/parameters/to"
+        },
+        {
+          "$ref": "#/components/parameters/year"
+        },
+        {
+          "$ref": "#/components/parameters/month"
+        },
+        {
+          "$ref": "#/components/parameters/quarter"
+        },
+        {
+          "$ref": "#/components/parameters/programme"
+        },
+        {
+          "$ref": "#/components/parameters/domain"
+        },
+        {
+          "$ref": "#/components/parameters/subdomain"
+        },
+        {
+          "$ref": "#/components/parameters/page"
+        },
+        {
+          "$ref": "#/components/parameters/limit"
+        }
+      ],
+      "get": {
+        "operationId": "getReportingHART",
+        "summary": "H.ART",
+        "responses": {
+          "200": {
+            "description": "Centre-scoped response. Data fields may be absent if the workspace is missing.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/Envelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "metrics": {
+                          "type": "object",
+                          "additionalProperties": {
+                            "$ref": "#/components/schemas/Metric"
+                          }
+                        },
+                        "previous": {
+                          "$ref": "#/components/schemas/Comparison"
+                        },
+                        "classification": {
+                          "type": "string"
+                        },
+                        "rows": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "programme": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "rank": {
+                                "type": "integer",
+                                "minimum": 0
+                              },
+                              "primaryDomain": {
+                                "type": "string"
+                              },
+                              "domains": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              },
+                              "subdomains": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              },
+                              "metrics": {
+                                "type": "object",
+                                "additionalProperties": {
+                                  "$ref": "#/components/schemas/Metric"
+                                }
+                              },
+                              "previous": {
+                                "type": "object",
+                                "additionalProperties": {
+                                  "$ref": "#/components/schemas/Metric"
+                                },
+                                "nullable": true
+                              },
+                              "monthly": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "month": {
+                                      "type": "string"
+                                    },
+                                    "metrics": {
+                                      "type": "object",
+                                      "additionalProperties": {
+                                        "$ref": "#/components/schemas/Metric"
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "pagination": {
+                          "type": "object",
+                          "properties": {
+                            "page": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "limit": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "total": {
+                              "type": "integer",
+                              "minimum": 0
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "405": {
+            "$ref": "#/components/responses/Error405"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        }
+      },
+      "head": {
+        "summary": "Reporting response headers",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/HeadSuccess"
+          },
+          "400": {
+            "$ref": "#/components/responses/Head400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Head401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Head403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Head404"
+          },
+          "405": {
+            "$ref": "#/components/responses/Head405"
+          },
+          "429": {
+            "$ref": "#/components/responses/Head429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Head500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Head503"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "ReportingBearer": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    },
+    "schemas": {
+      "Period": {
+        "type": "object",
+        "nullable": true,
+        "properties": {
+          "from": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "to": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          }
+        }
+      },
+      "Metric": {
+        "type": "object",
+        "required": [
+          "value",
+          "unit",
+          "status"
+        ],
+        "properties": {
+          "value": {
+            "oneOf": [
+              {
+                "type": "number",
+                "nullable": true
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            ]
+          },
+          "unit": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "available",
+              "missing",
+              "suppressed"
+            ]
+          },
+          "numerator": {
+            "type": "number",
+            "nullable": true
+          },
+          "denominator": {
+            "type": "number",
+            "nullable": true
+          }
+        }
+      },
+      "MetricDefinition": {
+        "type": "object",
+        "required": [
+          "id",
+          "displayName",
+          "description",
+          "unit",
+          "methodology",
+          "supportedFilters",
+          "aggregation",
+          "dataSource",
+          "availability",
+          "availableDateRange"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "methodology": {
+            "type": "string"
+          },
+          "supportedFilters": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "aggregation": {
+            "type": "string"
+          },
+          "dataSource": {
+            "type": "string"
+          },
+          "availableDateRange": {
+            "$ref": "#/components/schemas/Period"
+          },
+          "availability": {
+            "type": "string",
+            "enum": [
+              "source_present",
+              "missing"
+            ]
+          }
+        }
+      },
+      "Dataset": {
+        "type": "object",
+        "required": [
+          "id",
+          "supportedFilters",
+          "metrics"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "supportedFilters": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "classifications": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MetricDefinition"
+            }
+          }
+        }
+      },
+      "Envelope": {
+        "type": "object",
+        "required": [
+          "sourceSystem",
+          "centreId",
+          "centreName",
+          "dataset",
+          "schemaVersion",
+          "timezone",
+          "period",
+          "appliedFilters",
+          "dataLastUpdatedAt",
+          "dataRetrievedAt"
+        ],
+        "properties": {
+          "sourceSystem": {
+            "enum": [
+              "GlowBBDashboard"
+            ]
+          },
+          "centreId": {
+            "enum": [
+              "glow_bukit_batok",
+              "seen_bukit_batok",
+              "glow_nanyang",
+              "seen_nanyang"
+            ]
+          },
+          "centreName": {
+            "type": "string"
+          },
+          "dataset": {
+            "type": "string"
+          },
+          "schemaVersion": {
+            "enum": [
+              "1.0"
+            ]
+          },
+          "timezone": {
+            "enum": [
+              "Asia/Singapore"
+            ]
+          },
+          "period": {
+            "$ref": "#/components/schemas/Period"
+          },
+          "availableDateRange": {
+            "$ref": "#/components/schemas/Period"
+          },
+          "appliedFilters": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "coverageStatus": {
+            "enum": [
+              "missing",
+              "partial",
+              "within_observed_range"
+            ]
+          },
+          "dataLastUpdatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "dataRetrievedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "enum": [
+              "ready",
+              "missing"
+            ]
+          },
+          "reason": {
+            "type": "string"
+          },
+          "privacyMinimum": {
+            "type": "integer",
+            "minimum": 5
+          },
+          "reporting": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      },
+      "Comparison": {
+        "type": "object",
+        "nullable": true,
+        "properties": {
+          "from": {
+            "type": "string",
+            "format": "date"
+          },
+          "to": {
+            "type": "string",
+            "format": "date"
+          },
+          "metrics": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/Metric"
+            }
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "required": [
+          "error"
+        ],
+        "properties": {
+          "error": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "parameters": {
+      "centre": {
+        "name": "centre",
+        "in": "query",
+        "description": "Required when the key is configured for multiple centres.",
+        "schema": {
+          "type": "string",
+          "enum": [
+            "glow_bukit_batok",
+            "seen_bukit_batok",
+            "glow_nanyang",
+            "seen_nanyang"
+          ]
+        }
+      },
+      "from": {
+        "name": "from",
+        "in": "query",
+        "description": "Inclusive start in Asia/Singapore. Supply to as well.",
+        "schema": {
+          "type": "string",
+          "format": "date"
+        }
+      },
+      "to": {
+        "name": "to",
+        "in": "query",
+        "description": "Inclusive end in Asia/Singapore. Supply from as well.",
+        "schema": {
+          "type": "string",
+          "format": "date"
+        }
+      },
+      "year": {
+        "name": "year",
+        "in": "query",
+        "description": "Calendar year. Omit from and to.",
+        "schema": {
+          "type": "string",
+          "pattern": "^[0-9]{4}$"
+        }
+      },
+      "month": {
+        "name": "month",
+        "in": "query",
+        "description": "Calendar month, with year and without quarter.",
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 12
+        }
+      },
+      "quarter": {
+        "name": "quarter",
+        "in": "query",
+        "description": "Calendar quarter, with year and without month.",
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4
+        }
+      },
+      "programme": {
+        "name": "programme",
+        "in": "query",
+        "description": "Exact programme ID from programmes.",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "domain": {
+        "name": "domain",
+        "in": "query",
+        "schema": {
+          "type": "string",
+          "enum": [
+            "Physical",
+            "Cognitive",
+            "Learning",
+            "Social",
+            "Volunteerism"
+          ]
+        }
+      },
+      "subdomain": {
+        "name": "subdomain",
+        "in": "query",
+        "description": "Exact mapped Activity Name/Event Type label.",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "grain": {
+        "name": "grain",
+        "in": "query",
+        "schema": {
+          "type": "string",
+          "enum": [
+            "month",
+            "quarter",
+            "year"
+          ],
+          "default": "month"
+        }
+      },
+      "page": {
+        "name": "page",
+        "in": "query",
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10000,
+          "default": 1
+        }
+      },
+      "limit": {
+        "name": "limit",
+        "in": "query",
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100,
+          "default": 50
+        }
+      },
+      "assessmentType": {
+        "name": "assessmentType",
+        "in": "query",
+        "schema": {
+          "type": "string",
+          "enum": [
+            "SPPB",
+            "TANITA"
+          ]
+        }
+      }
+    },
+    "responses": {
+      "Error400": {
+        "description": "Invalid request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Error401": {
+        "description": "Missing or invalid bearer token",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Error403": {
+        "description": "Centre outside token scope",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Error404": {
+        "description": "Unavailable centre, classification or route",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Error405": {
+        "description": "Method not allowed",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Error429": {
+        "description": "Reporting capacity exceeded",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Error500": {
+        "description": "Reporting retrieval failed",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Error503": {
+        "description": "Reporting unavailable",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "HeadSuccess": {
+        "description": "Headers for the corresponding GET"
+      },
+      "Head400": {
+        "description": "Invalid request"
+      },
+      "Head401": {
+        "description": "Missing or invalid bearer token"
+      },
+      "Head403": {
+        "description": "Centre outside token scope"
+      },
+      "Head404": {
+        "description": "Unavailable centre, classification or route"
+      },
+      "Head405": {
+        "description": "Method not allowed"
+      },
+      "Head429": {
+        "description": "Reporting capacity exceeded"
+      },
+      "Head500": {
+        "description": "Reporting retrieval failed"
+      },
+      "Head503": {
+        "description": "Reporting unavailable"
+      }
+    }
+  }
+}

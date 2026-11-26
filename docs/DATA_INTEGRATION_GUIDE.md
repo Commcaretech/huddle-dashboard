@@ -1,4 +1,6 @@
-# Connect ActivityHub to Management Hub
+# ActivityHub integration (retired)
+
+> GlowBBDashboard is the active integration. See [the current setup](GLOWBB_INTEGRATION.md), [data mapping](GLOWBB_DATA_MAPPING.md), and [sync guide](GLOWBB_SYNC_GUIDE.md). ActivityHub entries below are retained as historical implementation notes.
 
 ActivityHub supplies approved schedule data through its Management Reporting API v1. The Hub fetches it server to server. Deploy the documented **management-reporting** Edge Function in the ActivityHub Supabase project before enabling the Hub source. See the ActivityHub repository's **docs/MANAGEMENT_HUB_API.md**, **docs/management-hub-api.openapi.json**, and **docs/MANAGEMENT_HUB_DATA_AUDIT.md**.
 
