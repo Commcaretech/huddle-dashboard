@@ -1,16 +1,22 @@
 import express from 'express';
+import { postgresConfig, WorkspaceConfigError } from '../server/config.js';
 
 let appPromise;
 
 async function initialise(env) {
-  const { postgresConfig } = await import('../server/config.js');
   const config = postgresConfig(env);
+  const connectionString = env.DATABASE_URL?.trim();
+  if (!connectionString) throw new WorkspaceConfigError('MISSING_DATABASE_URL','Set DATABASE_URL to the pooled Neon connection URL in Vercel Production.');
+  const database = URL.parse(connectionString);
+  if (!database || !['postgres:','postgresql:'].includes(database.protocol) || !database.hostname || !database.username) {
+    throw new WorkspaceConfigError('INVALID_DATABASE_URL','DATABASE_URL must contain the full PostgreSQL connection URL from Neon.');
+  }
   const [{ createApp }, { connectPostgres }, { attachDatabasePool }] = await Promise.all([
     import('../server/app.js'),
     import('../server/db/postgres.js'),
     import('@vercel/functions')
   ]);
-  const connection = connectPostgres(env.DATABASE_URL, { max:2, idleTimeoutMillis:5000 });
+  const connection = connectPostgres(connectionString, { max:2, idleTimeoutMillis:5000 });
   try {
     attachDatabasePool(connection.pool);
     return createApp(connection.db, { ...config, trustProxy:true, serveFrontend:false });
@@ -22,16 +28,19 @@ async function initialise(env) {
 
 async function handler(req, res) {
   let app;
+  const pendingApp = appPromise ??= initialise(process.env);
   try {
-    appPromise ??= initialise(process.env);
-    app = await appPromise;
+    app = await pendingApp;
   } catch (error) {
-    appPromise = undefined;
-    console.error('Reporting function failed to initialise', error?.code ?? error?.name);
+    if (appPromise === pendingApp) appPromise = undefined;
+    const configurationError = error instanceof WorkspaceConfigError;
+    const code = configurationError ? error.code : 'FUNCTION_STARTUP_FAILED';
+    const message = configurationError ? error.message : 'The reporting service could not start. Check the Vercel runtime logs.';
+    console.error('Reporting function failed to initialise',code,configurationError ? message : error?.code ?? error?.name);
     res.statusCode = 503;
     res.setHeader('Content-Type','application/json; charset=utf-8');
     res.setHeader('Cache-Control','no-store');
-    return res.end(JSON.stringify({ error:'The reporting service could not start. Check the Vercel runtime logs.' }));
+    return res.end(JSON.stringify({ error:message, code }));
   }
 
   // Restore the API path if the platform supplies the rewrite destination.
