@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { loadActor } from './permissions.js';
 import { reportRoutes, RequestError } from './report-routes.js';
 import { adminRoutes } from './admin-routes.js';
+import { integrationRoutes } from './integrations/routes.js';
 
 const dist = fileURLToPath(new URL('../dist/',import.meta.url));
 export function createApp(db, config) {
@@ -40,7 +41,7 @@ export function createApp(db, config) {
     if (!req.actor) return res.status(503).json({error:'The reporting workspace has not been initialised. Run the database setup command.'});
     next();
   });
-  app.use('/api',adminRoutes(db,config),reportRoutes(db));
+  app.use('/api',integrationRoutes(db,config),adminRoutes(db,config),reportRoutes(db));
   app.use('/api', (_req,res) => res.status(404).json({error:'Endpoint was not found.'}));
   if (config.serveFrontend !== false) {
     app.use(express.static(dist));

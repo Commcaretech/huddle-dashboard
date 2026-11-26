@@ -1,10 +1,8 @@
 import { Router } from 'express';
-import { z } from 'zod';
 import { and, desc, eq } from 'drizzle-orm';
-import { organisations, centres, periods, settings, aliases, sources, syncJobs } from './db/schema.js';
-import { centreInput, periodInput, settingsInput, short, uid } from './validation-hub.js';
+import { organisations, centres, periods, settings } from './db/schema.js';
+import { centreInput, periodInput, settingsInput, uid } from './validation-hub.js';
 import { requireAccess, RequestError, log } from './report-routes.js';
-import { sourceRegistry } from './integrations/contracts.js';
 
 export function adminRoutes(db, config) {
   const router = Router();
@@ -60,43 +58,6 @@ export function adminRoutes(db, config) {
       await log(tx,req.actor,'settings.updated',req.actor.orgId);
     });
     res.json({saved:true});
-  });
-  router.get('/admin/sources', async (req,res) => {
-    const orgId = req.actor.orgId;
-    const [configured, mappings] = await Promise.all([
-      db.select().from(sources).where(eq(sources.orgId,orgId)),
-      db.select().from(aliases).where(eq(aliases.orgId,orgId)).orderBy(aliases.alias)
-    ]);
-    const rows = await Promise.all(sourceRegistry.map(async source => {
-      const saved = configured.find(item => item.key === source.key);
-      const history = saved ? await db.select().from(syncJobs).where(eq(syncJobs.sourceId,saved.id)).orderBy(desc(syncJobs.createdAt)).limit(10) : [];
-      return {...source, status:'Awaiting adapter', history, aliases:mappings.filter(mapping => mapping.sourceId === saved?.id) };
-    }));
-    res.json(rows);
-  });
-  router.post('/admin/sources/:key/aliases', async (req,res) => {
-    const source = sourceRegistry.find(item => item.key === req.params.key);
-    if (!source) throw new RequestError(404,'Source was not found.');
-    const {alias,centreId} = z.object({alias:short,centreId:uid}).strict().parse(req.body);
-    const {actor} = req;
-    requireAccess(actor.centres.some(centre => centre.id === centreId && centre.active));
-    const mapping = await db.transaction(async tx => {
-      await tx.insert(sources).values({orgId:actor.orgId,key:source.key}).onConflictDoNothing();
-      const [record] = await tx.select().from(sources).where(and(eq(sources.orgId,actor.orgId),eq(sources.key,source.key)));
-      const [row] = await tx.insert(aliases).values({orgId:actor.orgId,sourceId:record.id,centreId,alias}).returning();
-      await log(tx,actor,'centre_alias.created',row.id);
-      return row;
-    });
-    res.status(201).json(mapping);
-  });
-  router.post('/admin/sources/aliases/:id/remove', async (req,res) => {
-    const id = uid.parse(req.params.id);
-    await db.transaction(async tx => {
-      const [row] = await tx.delete(aliases).where(and(eq(aliases.orgId,req.actor.orgId),eq(aliases.id,id))).returning();
-      if (!row) throw new RequestError(404,'Alias was not found.');
-      await log(tx,req.actor,'centre_alias.removed',id);
-    });
-    res.json({removed:true});
   });
   return router;
 }

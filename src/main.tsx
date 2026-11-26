@@ -9,6 +9,7 @@ import { Admin } from './Admin';
 import { Reporting } from './Reporting';
 import { Badge, Empty, Failure, Field, Loading } from './ui';
 import './styles.css';
+import { IntegrationAccessProvider } from './integration-access';
 
 const icons=[BarChart3,ClipboardCheck,Activity,Users,HeartPulse,Dumbbell,Palette,Radio,Users,GraduationCap,Package,CalendarDays,LayoutDashboard];
 const groups=['Performance','Programmes','Operations','Planning'];
@@ -100,13 +101,13 @@ function WorkspaceShell({workspace,loadingWorkspace,workspaceError,retryWorkspac
         <div className="topbar"><button className="icon-button mobile-menu" aria-label="Open navigation" onClick={()=>setMobile(true)}><Menu size={21}/></button>
           <div className="workspace-name">Management reporting</div>
           <div className="header-buttons">
-            {workspace&&<>{admin?<button className="source-button" title="View data sources" aria-label="View data sources" onClick={()=>go('data-sources')}><Database size={15}/><span>Sources pending</span></button>:<button className="source-button" onClick={()=>setSourceStatus(!sourceStatus)}><Database size={15}/><span>Sources pending</span></button>}
+            {workspace&&<>{admin?<button className="source-button" title="View data sources" aria-label="View data sources" onClick={()=>go('data-sources')}><Database size={15}/><span>Data sources</span></button>:<button className="source-button" onClick={()=>setSourceStatus(!sourceStatus)}><Database size={15}/><span>Data sources</span></button>}
             <button title="Outstanding actions" aria-label="Outstanding actions" onClick={()=>go('actions')}><ClipboardList size={16}/><span>Actions</span></button>
             <button title="Presentation mode" aria-label="Presentation mode" onClick={presentation} disabled={!period}><Presentation size={16}/><span>Present</span></button></>}
             {themeButton}
             {admin&&<button aria-label="Workspace settings" title="Workspace settings" onClick={()=>go('settings')}><Settings size={16}/><span>Settings</span></button>}
           </div>
-          {sourceStatus&&<div className="account-menu"><p>Live synchronisation is pending source adapters.</p><button onClick={()=>setSourceStatus(false)}>Close</button></div>}
+          {sourceStatus&&<div className="account-menu"><p>Source configuration is available to workspace administrators.</p><button onClick={()=>setSourceStatus(false)}>Close</button></div>}
         </div>
         {workspace&&<div className="filters">
           <Field label="Centre"><select value={centreId} onChange={event=>setCentre(event.target.value)}><option value="">{workspace?.user.role.startsWith('hq_')?'Combined HQ':'All assigned centres'}</option>{allCentres.map(item=><option key={item.id} value={item.id}>{item.name}{!item.active?' (inactive)':''}</option>)}</select></Field>
@@ -133,4 +134,4 @@ function WorkspaceShell({workspace,loadingWorkspace,workspaceError,retryWorkspac
     {toast&&!presenting&&<div className="toast" role="status"><ClipboardCheck size={19}/>{toast}</div>}
   </div>;
 }
-createRoot(document.getElementById('root')!).render(<QueryClientProvider client={client}><App/></QueryClientProvider>);
+createRoot(document.getElementById('root')!).render(<QueryClientProvider client={client}><IntegrationAccessProvider><App/></IntegrationAccessProvider></QueryClientProvider>);

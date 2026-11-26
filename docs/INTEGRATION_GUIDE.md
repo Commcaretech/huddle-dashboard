@@ -1,6 +1,6 @@
 # Integration guide
 
-The Data Sources registry shows planned datasets and their current status. The adapter contract in `server/integrations/contracts.js` defines connection testing, paged read-only reads and per-record transformation. The metrics contract stores timestamps, version and methodology alongside values. Live connection tests, sync and import are future implementation.
+The Data Sources registry shows planned datasets and their current status. The adapter contract in `server/integrations/contracts.js` defines connection testing, paged read-only reads and per-record transformation. The metrics contract stores timestamps, version and methodology alongside values. ActivityHub supports manual connection tests and sync. Other sources remain onboarding entries. See [ActivityHub setup](DATA_INTEGRATION_GUIDE.md).
 
 | Source | Inspected evidence and next input |
 | --- | --- |

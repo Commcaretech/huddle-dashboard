@@ -21,13 +21,16 @@ export const normalisedMetric = z.object({
 }).strict().refine(row => row.periodEnd >= row.periodStart, { path: ['periodEnd'], message:'End date precedes start date.' });
 
 /**
- * Read-only adapter. The engine will own credentials, exact centre mapping, writes and history.
+ * Each read-only adapter owns authentication, scope validation and source-specific paging.
+ * Source responses are validated and reduced to the fields approved for the Hub.
+ * The publication service owns claims, persisted progress, exact centre mapping and history.
+ *
+ * @typedef {{centreId:string,from:string,to:string}} IntegrationScope
  * @typedef {{
- *  key: string,
- *  categories: readonly string[],
- *  testConnection: () => Promise<void>,
- *  fetchPage: (input: {cursor?: string, updatedSince?: string}) =>
- *    Promise<{rows: unknown[], nextCursor?: string}>,
- *  transform: (row: unknown) => z.infer<typeof normalisedMetric>
+ *   key:string, configured:boolean,
+ *   test:() => Promise<object>,
+ *   centres:() => Promise<object>,
+ *   datasets:() => Promise<object>,
+ *   get:(dataset:string,scope:IntegrationScope,options?:{cursor?:string,etag?:string,limit?:number}) => Promise<object>
  * }} SourceAdapter
  */

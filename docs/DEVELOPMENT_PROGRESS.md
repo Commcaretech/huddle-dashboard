@@ -5,7 +5,7 @@
 - [x] Build initial Drizzle schema, demo database and shared workspace configuration.
 - [x] Add manual reporting, conclusions, action tracking and a shared developments model.
 - [ ] Phase 3 analytical calculations and redesigned Excel/CSV import.
-- [ ] Phase 4 verified live source adapters, mappings and sync operations.
+- [ ] Phase 4 ActivityHub adapter, mapping and manual sync (local verification); hosted connection and other adapters pending.
 - [ ] Phase 5 approval, immutable snapshots and export.
 
 ## Verified locally

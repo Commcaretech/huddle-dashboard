@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm';
-import { pgTable, pgEnum, uuid, text, boolean, integer, date, timestamp, jsonb, numeric, unique, index, check, foreignKey } from 'drizzle-orm/pg-core';
+import { pgTable, pgEnum, uuid, text, boolean, integer, date, timestamp, jsonb, numeric, unique, uniqueIndex, index, check, foreignKey } from 'drizzle-orm/pg-core';
 
 const id = () => uuid().primaryKey().defaultRandom();
 const createdAt = () => timestamp('created_at', { withTimezone: true }).defaultNow().notNull();
@@ -90,10 +90,36 @@ export const metrics = pgTable('normalised_metrics', {
 export const syncJobs = pgTable('sync_jobs', {
   id: id(), sourceId: uuid('source_id').notNull().references(() => sources.id),
   status: text().notNull(), counts: jsonb().default({}).notNull(), errorSummary: text('error_summary'),
+  state: jsonb(), leaseUntil: timestamp('lease_until', { withTimezone: true }),
   finishedAt: timestamp('finished_at', { withTimezone: true }), createdAt: createdAt()
-}, t => [index().on(t.sourceId, t.createdAt)]);
+}, t => [index().on(t.sourceId, t.createdAt), uniqueIndex('sync_jobs_one_running').on(t.sourceId).where(sql`${t.status} = 'running'`)]);
 export const audit = pgTable('audit_logs', {
   id: id(), orgId: uuid('org_id').notNull().references(() => organisations.id),
   actorId: uuid('actor_id').notNull().references(() => users.id), event: text().notNull(),
   recordId: uuid('record_id').notNull(), createdAt: createdAt()
 }, t => [index().on(t.orgId, t.createdAt)]);
+
+export const integrationDatasets = pgTable('integration_datasets', {
+  sourceId: uuid('source_id').notNull().references(() => sources.id),
+  key: text().notNull(), definition: jsonb().notNull(), updatedAt: updatedAt()
+}, t => [unique().on(t.sourceId,t.key)]);
+export const integrationSnapshots = pgTable('integration_snapshots', {
+  id: id(), orgId: uuid('org_id').notNull(), sourceId: uuid('source_id').notNull(), centreId: uuid('centre_id').notNull(),
+  externalCentre: text('external_centre').notNull(), fromDate: date('from_date').notNull(), toDate: date('to_date').notNull(),
+  data: jsonb().notNull(), refreshedAt: timestamp('refreshed_at',{withTimezone:true}).notNull()
+}, t => [
+  unique().on(t.sourceId,t.externalCentre,t.fromDate,t.toDate),
+  foreignKey({ columns:[t.orgId,t.centreId], foreignColumns:[centres.orgId,centres.id] }),
+  foreignKey({ columns:[t.orgId,t.sourceId], foreignColumns:[sources.orgId,sources.id] }),
+  index().on(t.orgId,t.centreId,t.fromDate,t.toDate)
+]);
+export const integrationIssues = pgTable('integration_issues', {
+  id: id(), sourceId: uuid('source_id').notNull().references(() => sources.id),
+  jobId: uuid('job_id').references(() => syncJobs.id),
+  code: text().notNull(), detail: text().notNull(), createdAt: createdAt()
+}, t => [index().on(t.sourceId,t.createdAt)]);
+export const integrationFlags = pgTable('integration_flags', {
+  sourceId: uuid('source_id').notNull().references(() => sources.id),
+  externalCentre: text('external_centre').notNull(), externalId: text('external_id').notNull(),
+  hart: boolean().default(false).notNull(), highlight: boolean().default(false).notNull(), updatedAt: updatedAt()
+}, t => [unique().on(t.sourceId,t.externalCentre,t.externalId)]);

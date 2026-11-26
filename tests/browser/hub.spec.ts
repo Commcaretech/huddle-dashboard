@@ -31,7 +31,9 @@ test('mobile sidebar, theme and source registry are reachable',async({page})=>{
   await expect(page.locator('html')).toHaveAttribute('data-theme','dark');
   await page.getByRole('button',{name:'View data sources'}).click();
   await expect(page.getByRole('heading',{name:'Source registry'})).toBeVisible();
-  await expect(page.getByText('Awaiting adapter',{exact:true})).toHaveCount(9);
+  await expect(page.getByText('Awaiting adapter',{exact:true})).toHaveCount(8);
+  await expect(page.getByText('Not configured',{exact:true})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Data coverage'})).toBeVisible();
 });
 
 test('a fresh browser opens reports and workspace settings directly',async({page})=>{
@@ -41,4 +43,29 @@ test('a fresh browser opens reports and workspace settings directly',async({page
   await expect(page.getByRole('button',{name:/sign in|sign out/i})).toHaveCount(0);
   await page.getByRole('button',{name:'Workspace settings'}).click();
   await expect(page.getByRole('heading',{name:'Centre registry'})).toBeVisible();
+});
+
+test('operator unlock enables source controls and shows attributed imported figures',async({page})=>{
+  const operatorKey='b'.repeat(64);
+  const source={key:'activityhub',name:'ActivityHub',configured:true,status:'Ready for connection test',enabled:true,
+    datasets:['Programme series','Scheduled occurrences'],type:'Read-only API',aliases:[],history:[]};
+  await page.route('**/api/admin/sources',async route=>{
+    const authorised=route.request().headers()['x-integration-operator-key']===operatorKey;
+    await route.fulfill({json:{authorised,sources:[source]}});
+  });
+  await page.route('**/api/integrations/report/kpi-performance?**',async route=>{
+    expect(route.request().headers()['x-integration-operator-key']).toBe(operatorKey);
+    await route.fulfill({json:{window:{start:'2026-11-01',end:'2026-11-30'},source:'ActivityHub',
+      coverage:[],metrics:{Sessions:6,Cancelled:2},methodology:{Sessions:'Persisted dated occurrences',Cancelled:'Cancelled source status'},
+      programmes:[],sessions:[],truncated:false}});
+  });
+  await page.goto('/');
+  await page.getByRole('button',{name:'View data sources'}).click();
+  await expect(page.getByRole('button',{name:'Test connection'})).toHaveCount(0);
+  await page.getByLabel('Integration operator key').fill(operatorKey);
+  await page.getByRole('button',{name:'Unlock integrations'}).click();
+  await expect(page.getByRole('button',{name:'Test connection'})).toBeVisible();
+  await page.getByRole('link',{name:'KPI Performance'}).click();
+  await expect(page.getByRole('heading',{name:'ActivityHub reporting'})).toBeVisible();
+  await expect(page.getByRole('row').filter({hasText:'Persisted dated occurrences'}).getByRole('cell',{name:'6',exact:true})).toBeVisible();
 });

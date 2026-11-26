@@ -15,14 +15,17 @@ export type Action = {
   priority:string; status:string; progress:number; evidence:string; completedAt:string|null; createdAt:string;
   overdue:boolean; carriedForward:boolean; periodName:string;
 };
-export type DataSource = {key:string; name:string; type:string; datasets:string[]; status:string; history:unknown[]; aliases:{id:string;centreId:string;alias:string}[]};
 export class ApiError extends Error {
   status:number;
   constructor(status:number,message:string) { super(message); this.status=status; }
 }
-export async function api<T>(path:string, method='GET', input?:unknown):Promise<T> {
+export async function api<T>(path:string, method='GET', input?:unknown, operatorKey?:string):Promise<T> {
   const response = await fetch('/api' + path, {
-    method, ...(method !== 'GET' ? {headers:{'Content-Type':'application/json'},body:JSON.stringify(input ?? {})} : {})
+    method, headers:{
+      ...(method!=='GET'?{'Content-Type':'application/json'}:{}),
+      ...(operatorKey?{'X-Integration-Operator-Key':operatorKey}:{})
+    },
+    ...(method!=='GET'?{body:JSON.stringify(input??{})}:{})
   });
   const value = await response.json().catch(() => ({}));
   if (!response.ok) throw new ApiError(response.status,value.error?.message || (typeof value.error === 'string' && value.error) || value.message || 'The request could not be completed.');

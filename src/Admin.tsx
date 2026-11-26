@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { Building2, CalendarDays, Database, Settings2 } from 'lucide-react';
 import { addDays, fortnight, periodKinds, singaporeToday } from '../shared/reporting.js';
-import { api, dateLabel, type Centre, type DataSource, type Workspace } from './api';
-import { Badge, Empty, Failure, Field, Loading, Modal, SaveForm, value } from './ui';
+import { api, dateLabel, type Centre, type Workspace } from './api';
+import { Badge, Empty, Field, Modal, SaveForm, value } from './ui';
+import { IntegrationSources } from './IntegrationSources';
 
 const views=[['Centres',Building2],['Periods',CalendarDays],['Organisation',Settings2],['Data sources',Database]] as const;
 type View = typeof views[number][0];
@@ -16,7 +16,7 @@ export function Admin({workspace,initial,refresh}:{workspace:Workspace;initial:V
       {view==='Centres'&&<Centres workspace={workspace} refresh={refresh}/>}
       {view==='Periods'&&<Periods workspace={workspace} refresh={refresh}/>}
       {view==='Organisation'&&<Organisation workspace={workspace} refresh={refresh}/>}
-      {view==='Data sources'&&<Sources workspace={workspace} refresh={refresh}/>}
+      {view==='Data sources'&&<IntegrationSources workspace={workspace}/>}
     </section>
   </>;
 }
@@ -67,30 +67,4 @@ function Organisation({workspace,refresh}:SettingsProps) {
         {Array.from({length:12},(_,index)=><option key={index} value={index+1}>{new Intl.DateTimeFormat('en-SG',{month:'long',timeZone:'UTC'}).format(new Date(Date.UTC(2026,index,1)))}</option>)}</select></Field>
       <Field label="Fortnight anchor date"><input name="fortnightAnchor" type="date" required defaultValue={workspace.settings.fortnightAnchor}/></Field>
     </SaveForm></div></>;
-}
-function Sources({workspace,refresh}:SettingsProps) {
-  const [key,setKey]=useState('');
-  const [remove,setRemove]=useState<{id:string;alias:string}|null>(null);
-  const sources=useQuery({queryKey:['sources'],queryFn:()=>api<DataSource[]>('/admin/sources')});
-  const selected=sources.data?.find(source=>source.key===key);
-  const active=workspace.centres.filter(centre=>centre.active);
-  return <>
-    <div className="panel-heading"><div><h2>Source registry</h2><p>Connections and imports become available when their adapters are implemented and verified.</p></div></div>
-    {sources.isPending?<Loading/>:sources.isError?<Failure error={sources.error}/>:<div className="table-wrap"><table>
-      <thead><tr><th>Source</th><th>Type</th><th>Planned datasets</th><th>Connection</th><th>Last successful sync</th><th>Centre mapping</th></tr></thead>
-      <tbody>{sources.data.map(source=><tr key={source.key}><td><strong>{source.name}</strong></td><td>{source.type}</td><td>{source.datasets.join(' · ')}</td><td><Badge>{source.status}</Badge></td><td>—</td><td><button onClick={()=>setKey(source.key)}>Manage aliases ({source.aliases.length})</button></td></tr>)}</tbody></table></div>}
-    {selected&&<Modal title={selected.name+' centre aliases'} close={()=>{setKey('');setRemove(null);}}>
-      <p>Enter the exact centre label or code used by the source.</p>
-      {selected.aliases.length>0&&<div className="table-wrap"><table><thead><tr><th>Source alias</th><th>Hub centre</th><th>Manage</th></tr></thead><tbody>
-        {selected.aliases.map(mapping=><tr key={mapping.id}><td>{mapping.alias}</td><td>{workspace.centres.find(centre=>centre.id===mapping.centreId)?.name}</td>
-          <td><button onClick={()=>setRemove(mapping)}>Remove</button></td></tr>)}
-      </tbody></table></div>}
-      {remove?<SaveForm label="Remove alias" onDone={()=>{setRemove(null);refresh('Alias removed');}} onSave={()=>api('/admin/sources/aliases/'+remove.id+'/remove','POST')}>
-        <p className="wide">Remove the mapping for {remove.alias}?</p><button type="button" onClick={()=>setRemove(null)}>Cancel</button>
-      </SaveForm>:active.length?<SaveForm label="Add alias" onDone={()=>{setKey('');refresh('Alias saved');}} onSave={data=>api('/admin/sources/'+selected.key+'/aliases','POST',{alias:value(data,'alias'),centreId:value(data,'centreId')})}>
-        <Field label="Source centre alias"><input name="alias" required maxLength={160}/></Field>
-        <Field label="Hub centre"><select name="centreId">{active.map(centre=><option key={centre.id} value={centre.id}>{centre.name}</option>)}</select></Field>
-      </SaveForm>:<Empty title="Create an active centre to add an alias"/>}
-    </Modal>}
-  </>;
 }
