@@ -6,9 +6,27 @@ DECLARE
 BEGIN
   PERFORM pg_advisory_xact_lock(407143041);
   PERFORM set_config('search_path', 'public, pg_catalog', true);
-  IF to_regclass('drizzle.__drizzle_migrations') IS NULL OR to_regclass('public.organisations') IS NULL THEN
-    RAISE EXCEPTION 'Run the initial Neon browser setup first and verify this is the Hub branch.';
+  IF to_regtype('public.app_role') IS NULL OR EXISTS (
+    SELECT 1 FROM unnest(ARRAY[
+      'action_history','action_items','centre_aliases','audit_logs','centres',
+      'report_entries','user_centre_permissions','normalised_metrics','organisations',
+      'reporting_periods','application_settings','integration_sources','sync_jobs','user_profiles'
+    ]) AS base(name)
+    WHERE to_regclass('public.' || base.name) IS NULL
+  ) THEN
+    RAISE EXCEPTION 'Base Hub tables are missing. Check the branch and database, then run the initial Neon browser setup.';
   END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM public.user_profiles WHERE subject = 'hub-open-workspace' AND active AND role = 'hq_admin'
+  ) THEN
+    RAISE EXCEPTION 'The shared workspace is missing. Run the initial Neon browser setup on this branch.';
+  END IF;
+  CREATE SCHEMA IF NOT EXISTS drizzle;
+  CREATE TABLE IF NOT EXISTS drizzle.__drizzle_migrations (
+    id serial PRIMARY KEY,
+    hash text NOT NULL,
+    created_at bigint
+  );
   IF NOT EXISTS (SELECT 1 FROM drizzle.__drizzle_migrations WHERE created_at = 1795668546421) THEN
 CREATE TABLE "integration_datasets" (
 	"source_id" uuid NOT NULL,

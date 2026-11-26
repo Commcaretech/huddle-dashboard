@@ -6,7 +6,7 @@ ActivityHub supplies approved schedule data through its Management Reporting API
 
 In the Neon Console, select the same project, branch and database as the Hub's Vercel runtime. Open **SQL Editor** as the database owner. If the base hub is new, run [neon-browser-setup.sql](neon-browser-setup.sql) first. After creating the runtime role, paste [neon-browser-integration-upgrade.sql](neon-browser-integration-upgrade.sql) into a new query and run it. Expect **Integration schema ready**. Change the runtime role name near the top only if Vercel connects as a role other than `huddle_app`. This script applies [0001_silent_aqueduct.sql](../migrations/0001_silent_aqueduct.sql), records it in Drizzle and grants runtime access.
 
-On a workstation with the project and Node.js installed, the alternative migration command is `npm.cmd run db:migrate` with the direct owner URL in `DATABASE_URL_UNPOOLED`. Run the browser upgrade script afterward to apply its runtime grants. The script checks the migration journal before applying DDL. For a database with manually created tables and no migration journal, have its owner review migration history before applying this upgrade.
+On a workstation with the project and Node.js installed, the alternative migration command is `npm.cmd run db:migrate` with the direct owner URL in `DATABASE_URL_UNPOOLED`. Run the browser upgrade script afterward to apply its runtime grants. The script checks the migration journal before applying DDL. For a database set up by hand, the browser script checks that the base Hub tables and shared workspace exist, then creates the journal when needed and records the integration upgrade.
 
 ## 2. Set server environment variables
 
